@@ -171,41 +171,96 @@ def _extract_text_from_transcript_object(transcript_obj):
 
 
 def get_transcript(video_id):
-    """Get transcript text from a YouTube video. SIMPLIFIED for production reliability."""
-    try:
-        # Use the method that works in local testing (version 1.2.4)
-        api = YouTubeTranscriptApi()
-        if hasattr(api, 'fetch'):
-            result = api.fetch(video_id)
-            if hasattr(result, 'snippets'):
-                text_parts = []
-                for snippet in result.snippets:
-                    if hasattr(snippet, 'text'):
-                        text_parts.append(snippet.text.strip())
-                text = ' '.join(text_parts).strip()
-                if text:
-                    print(f'[transcript] SUCCESS: Extracted {len(text)} characters using fetch API')
-                    return text
-    except Exception as e:
-        print(f'[transcript] Fetch API failed: {type(e).__name__}: {str(e)}')
+    """Get transcript text from a YouTube video. Robust implementation with multiple fallbacks."""
 
-    # Fallback: Try the old static method in case production has different version
+    # Method 1: Try the direct fetch method
     try:
-        if hasattr(YouTubeTranscriptApi, 'get_transcript'):
-            transcript = YouTubeTranscriptApi.get_transcript(video_id)
-            if transcript:
-                text_parts = []
-                for entry in transcript:
-                    if isinstance(entry, dict) and 'text' in entry:
-                        text_parts.append(entry['text'].strip())
-                    elif hasattr(entry, 'text'):
-                        text_parts.append(entry.text.strip())
-                text = ' '.join(text_parts).strip()
-                if text:
-                    print(f'[transcript] SUCCESS: Extracted {len(text)} characters using static API')
-                    return text
+        api = YouTubeTranscriptApi()
+        transcript = api.fetch(video_id)
+        if hasattr(transcript, 'snippets') and transcript.snippets:
+            text_parts = []
+            for snippet in transcript.snippets:
+                if hasattr(snippet, 'text'):
+                    text_parts.append(snippet.text.strip())
+            text = ' '.join(text_parts).strip()
+            if text and len(text) > 50:
+                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using fetch method')
+                return text
     except Exception as e:
-        print(f'[transcript] Static API failed: {type(e).__name__}: {str(e)}')
+        print(f'[transcript] fetch method failed: {type(e).__name__}: {str(e)}')
+
+    # Method 2: Try using the list method to get available transcripts
+    try:
+        api = YouTubeTranscriptApi()
+        transcripts = api.list(video_id)
+
+        if hasattr(transcripts, 'transcripts') and transcripts.transcripts:
+            # Try each available transcript
+            for transcript_info in transcripts.transcripts:
+                try:
+                    # Fetch the transcript
+                    if hasattr(transcript_info, 'fetch'):
+                        transcript = transcript_info.fetch()
+                        if hasattr(transcript, 'snippets') and transcript.snippets:
+                            text_parts = []
+                            for snippet in transcript.snippets:
+                                if hasattr(snippet, 'text'):
+                                    text_parts.append(snippet.text.strip())
+                            text = ' '.join(text_parts).strip()
+                            if text and len(text) > 50:
+                                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using list method')
+                                return text
+                except Exception as inner_e:
+                    print(f'[transcript] individual transcript failed: {inner_e}')
+                    continue
+    except Exception as e:
+        print(f'[transcript] list method failed: {type(e).__name__}: {str(e)}')
+
+    # Method 3: Try direct instantiation approach (fallback)
+    try:
+        # Maybe the API needs to be used differently
+        result = YouTubeTranscriptApi().fetch(video_id)
+
+        # Handle different possible response structures
+        if hasattr(result, 'fetch') and callable(result.fetch):
+            actual_transcript = result.fetch()
+        else:
+            actual_transcript = result
+
+        if hasattr(actual_transcript, 'snippets'):
+            text_parts = []
+            for snippet in actual_transcript.snippets:
+                if hasattr(snippet, 'text'):
+                    text_parts.append(snippet.text.strip())
+            text = ' '.join(text_parts).strip()
+            if text and len(text) > 50:
+                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using fallback method')
+                return text
+
+        # Maybe it's a different structure
+        if hasattr(actual_transcript, 'text'):
+            text = actual_transcript.text.strip()
+            if text and len(text) > 50:
+                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using direct text')
+                return text
+
+        # Maybe it's a list or dict
+        if isinstance(actual_transcript, (list, tuple)):
+            text_parts = []
+            for item in actual_transcript:
+                if hasattr(item, 'text'):
+                    text_parts.append(item.text.strip())
+                elif isinstance(item, dict) and 'text' in item:
+                    text_parts.append(str(item['text']).strip())
+                elif isinstance(item, str):
+                    text_parts.append(item.strip())
+            text = ' '.join(text_parts).strip()
+            if text and len(text) > 50:
+                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using list parsing')
+                return text
+
+    except Exception as e:
+        print(f'[transcript] fallback method failed: {type(e).__name__}: {str(e)}')
 
     print(f'[transcript] FAILED: All methods failed for video {video_id}')
     return None
@@ -563,30 +618,24 @@ def api_generate():
     language = data.get('language', 'English (Pure)')
     difficulty = data.get('difficulty', 'Medium (Standard)')
     study_depth = data.get('study_depth', '40')
-    manual_transcript = data.get('manual_transcript', '').strip()
 
     # Extract video ID
     video_id = extract_video_id(url)
-    if not video_id and not manual_transcript:
+    if not video_id:
         return jsonify({'error': 'Invalid YouTube URL. Please paste a valid YouTube video link.'}), 400
 
-    # Get transcript (auto-extract or use manual)
-    transcript = None
-    if manual_transcript:
-        transcript = manual_transcript
-        print(f'[transcript] Using manual transcript: {len(transcript)} chars')
-    elif video_id:
-        transcript = get_transcript(video_id)
-        if not transcript:
-            # Provide detailed error with helpful info
-            error_msg = (
-                'Could not extract transcript from this video. '
-                'This usually means the video does not have captions/subtitles available. '
-                'Try: (1) Choose a video with captions, (2) Upload a PDF/PPT instead, '
-                'or (3) Check if the video is publicly accessible.'
-            )
-            print(f'[transcript] Failed for video_id: {video_id}, URL: {url}')
-            return jsonify({'error': error_msg, 'video_id': video_id}), 400
+    # Get transcript (auto-extract only)
+    transcript = get_transcript(video_id) if video_id else None
+    if not transcript:
+        # Provide detailed error with helpful info
+        error_msg = (
+            'Could not extract transcript from this video. '
+            'This usually means the video does not have captions/subtitles available. '
+            'Try: (1) Choose a video with captions, (2) Upload a PDF/PPT instead, '
+            'or (3) Check if the video is publicly accessible.'
+        )
+        print(f'[transcript] Failed for video_id: {video_id}, URL: {url}')
+        return jsonify({'error': error_msg, 'video_id': video_id}), 400
 
     if not transcript or len(transcript.strip()) < 50:
         return jsonify({'error': 'Transcript is too short or empty. Please try a different video or upload a document.'}), 400
@@ -594,7 +643,7 @@ def api_generate():
     # Check cache — if we already generated notes for this URL, reuse them
     try:
         cached_data, cached_key = find_study_data_by_url(url)
-        if cached_data and cached_key and not manual_transcript:
+        if cached_data and cached_key:
             session['data_key'] = cached_key
             _cache_store(cached_key, cached_data, url)
             email = session.get('user_email')

@@ -162,10 +162,7 @@ if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else docum
 <input id="content-url" class="w-full pl-12 pr-4 py-5 border border-primary/20 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-lg bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500" placeholder="https://www.youtube.com/watch?v=..." type="text"/>
 </div>
 <div class="flex items-center justify-center">
-<button id="show-manual-transcript" type="button" class="text-xs font-semibold text-primary hover:text-primary-dark flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-all">
-<span class="material-symbols-outlined text-sm">edit_note</span>
-Can't extract transcript? Click to paste manually
-</button>
+<span class="text-xs text-slate-400 dark:text-slate-500">YouTube videos with captions/subtitles work best</span>
 </div>
 <!-- OR Divider -->
 <div class="flex items-center gap-4">
@@ -194,17 +191,6 @@ Can't extract transcript? Click to paste manually
 </button>
 </div>
 </div>
-</div>
-<!-- Manual Transcript Option (Hidden by default) -->
-<div id="manual-transcript-section" class="hidden mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-<div class="flex items-start gap-2 mb-3">
-<span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-xl">info</span>
-<div>
-<p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Can't extract transcript?</p>
-<p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5">Paste the video transcript or text content manually below and click generate.</p>
-</div>
-</div>
-<textarea id="manual-transcript-input" class="w-full h-32 p-3 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all outline-none text-sm bg-white dark:bg-slate-800 dark:text-slate-100 resize-none" placeholder="Paste transcript or text content here (minimum 100 characters)..."></textarea>
 </div>
 </div>
 </div>
@@ -293,24 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileName = document.getElementById('file-name');
     const fileRemove = document.getElementById('file-remove');
     const fileLabel = document.getElementById('file-upload-label');
-    const showManualBtn = document.getElementById('show-manual-transcript');
-    const manualSection = document.getElementById('manual-transcript-section');
-    const manualInput = document.getElementById('manual-transcript-input');
     let uploadedFile = null;
 
-    // Toggle manual transcript section
-    if (showManualBtn && manualSection) {
-        showManualBtn.addEventListener('click', () => {
-            manualSection.classList.toggle('hidden');
-            if (!manualSection.classList.contains('hidden')) {
-                manualInput.focus();
-            }
-        });
-    }
-
     function hasInput() {
-        const hasManualTranscript = manualInput && manualInput.value.trim().length >= 50;
-        return input.value.trim() !== '' || uploadedFile !== null || hasManualTranscript;
+        return input.value.trim() !== '' || uploadedFile !== null;
     }
 
     function updateButtonState() {
@@ -326,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     input.addEventListener('input', () => {
-        // If user types a URL, clear file upload and manual transcript
+        // If user types a URL, clear file upload
         if (input.value.trim() !== '') {
             if (uploadedFile) {
                 uploadedFile = null;
@@ -334,18 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileSelected.classList.add('hidden');
                 fileLabel.classList.remove('hidden');
             }
-            if (manualInput) {
-                manualInput.value = '';
-            }
         }
         updateButtonState();
     });
-
-    if (manualInput) {
-        manualInput.addEventListener('input', () => {
-            updateButtonState();
-        });
-    }
 
     fileUpload.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -443,11 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             // YouTube URL mode — same as before
-            const manualTranscript = manualInput ? manualInput.value.trim() : '';
             localStorage.setItem('studysnap_url', input.value.trim());
             localStorage.setItem('studysnap_upload_mode', '');
             localStorage.setItem('studysnap_file_key', '');
-            localStorage.setItem('studysnap_manual_transcript', manualTranscript);
+            localStorage.setItem('studysnap_manual_transcript', '');
             localStorage.setItem('studysnap_exam_mode', examMode);
             localStorage.setItem('studysnap_language', language);
             localStorage.setItem('studysnap_difficulty', difficulty);
