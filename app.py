@@ -729,7 +729,34 @@ def health_check():
     return jsonify({'status': 'healthy'}), 200
 
 
-@app.route("/debug/transcript/<video_id>")
+@app.route("/test-transcript")
+def test_transcript():
+    """Quick test endpoint to verify transcript extraction works."""
+    try:
+        # Test with a known video with captions
+        test_video_id = 'dQw4w9WgXcQ'  # Rick Astley - Never Gonna Give You Up
+        transcript = get_transcript(test_video_id)
+
+        if transcript:
+            return jsonify({
+                'status': 'SUCCESS',
+                'message': 'Transcript extraction working correctly!',
+                'video_id': test_video_id,
+                'transcript_length': len(transcript),
+                'preview': transcript[:200] + '...' if len(transcript) > 200 else transcript
+            })
+        else:
+            return jsonify({
+                'status': 'FAILED',
+                'message': 'Transcript extraction failed',
+                'video_id': test_video_id
+            }), 500
+    except Exception as e:
+        return jsonify({
+            'status': 'ERROR',
+            'message': str(e),
+            'error_type': type(e).__name__
+        }), 500
 def debug_transcript(video_id):
     """Debug endpoint to test transcript extraction in production."""
     try:
