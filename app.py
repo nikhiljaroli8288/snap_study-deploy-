@@ -153,10 +153,17 @@ def _extract_text_from_transcript_object(transcript_obj):
         return transcript_obj.strip()
     if isinstance(transcript_obj, list):
         return _extract_text_from_transcript_entries(transcript_obj)
+    # Handle FetchedTranscript object with snippets attribute
+    if hasattr(transcript_obj, 'snippets'):
+        try:
+            snippets = getattr(transcript_obj, 'snippets', [])
+            return _extract_text_from_transcript_entries(snippets)
+        except Exception:
+            pass
     if hasattr(transcript_obj, 'fetch'):
         try:
             fetched = transcript_obj.fetch()
-            return _extract_text_from_transcript_entries(fetched)
+            return _extract_text_from_transcript_object(fetched)
         except Exception:
             return ''
     return ''
@@ -164,74 +171,110 @@ def _extract_text_from_transcript_object(transcript_obj):
 
 def get_transcript(video_id):
     """Get transcript text from a YouTube video. Supports multiple API versions."""
-    languages = ['en', 'hi', 'en-US', 'en-GB', 'en-IN']
+    all_errors = []
+    languages = ['en', 'hi', 'en-US', 'en-GB', 'en-IN', 'auto']
 
-    # Try the static method approach (version 0.6.x and 1.x)
+    # Method 1: Try instance-based fetch API (newest version)
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        text = _extract_text_from_transcript_object(transcript)
-        if text:
-            return text
+        api = YouTubeTranscriptApi()
+        if hasattr(api, 'fetch'):
+            result = api.fetch(video_id)
+            text = _extract_text_from_transcript_object(result)
+            if text:
+                print(f'[transcript] SUCCESS: Instance fetch method extracted {len(text)} chars')
+                return text
     except Exception as e:
-        print(f'[transcript] Primary method failed: {e}')
+        err_msg = f'Method 1 (instance fetch): {type(e).__name__}: {str(e)}'
+        print(f'[transcript] {err_msg}')
+        all_errors.append(err_msg)
 
-    # Try with language fallback
+    # Method 2: Try instance-based list API
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=languages)
-        text = _extract_text_from_transcript_object(transcript)
-        if text:
-            return text
-    except Exception as e:
-        print(f'[transcript] Language fallback failed: {e}')
-
-    # Try transcript listing APIs (covers more video/language cases)
-    try:
-        ytt = YouTubeTranscriptApi()
-        list_fn = None
-        if hasattr(ytt, 'list'):
-            list_fn = ytt.list
-        elif hasattr(YouTubeTranscriptApi, 'list_transcripts'):
-            list_fn = YouTubeTranscriptApi.list_transcripts
-        if list_fn:
-            transcript_list = list_fn(video_id)
-            for lang in languages:
+        api = YouTubeTranscriptApi()
+        if hasattr(api, 'list'):
+            transcript_list = api.list(video_id)
+            # Try manually created first
+            for transcript in transcript_list:
                 try:
-                    if hasattr(transcript_list, 'find_transcript'):
-                        chosen = transcript_list.find_transcript([lang])
-                        text = _extract_text_from_transcript_object(chosen)
-                        if text:
-                            return text
-                except Exception:
-                    continue
-            for finder in ('find_manually_created_transcript', 'find_generated_transcript'):
-                fn = getattr(transcript_list, finder, None)
-                if not fn:
-                    continue
-                try:
-                    chosen = fn(languages)
-                    text = _extract_text_from_transcript_object(chosen)
+                    text = _extract_text_from_transcript_object(transcript)
                     if text:
+                        print(f'[transcript] SUCCESS: Instance list method extracted {len(text)} chars')
                         return text
                 except Exception:
                     continue
     except Exception as e:
-        print(f'[transcript] Transcript-list fallback failed: {e}')
+        err_msg = f'Method 2 (instance list): {type(e).__name__}: {str(e)}'
+        print(f'[transcript] {err_msg}')
+        all_errors.append(err_msg)
 
-    # Try instance-based approach (newer versions)
-    try:
-        ytt = YouTubeTranscriptApi()
-        if hasattr(ytt, 'fetch'):
-            transcript = ytt.fetch(video_id)
+    # Method 3: Try static get_transcript (older versions)
+    if hasattr(YouTubeTranscriptApi, 'get_transcript'):
+        try:
+            transcript = YouTubeTranscriptApi.get_transcript(video_id)
             text = _extract_text_from_transcript_object(transcript)
             if text:
+                print(f'[transcript] SUCCESS: Static method extracted {len(text)} chars')
                 return text
-        elif hasattr(ytt, 'get_transcript'):
-            transcript = ytt.get_transcript(video_id)
+        except Exception as e:
+            err_msg = f'Method 3 (static): {type(e).__name__}: {str(e)}'
+            print(f'[transcript] {err_msg}')
+            all_errors.append(err_msg)
+
+        # Try with language fallback
+        try:
+            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=languages)
             text = _extract_text_from_transcript_object(transcript)
             if text:
+                print(f'[transcript] SUCCESS: Language fallback extracted {len(text)} chars')
                 return text
-    except Exception as e:
-        print(f'[transcript] Instance method failed: {e}')
+        except Exception as e:
+            err_msg = f'Method 4 (language fallback): {type(e).__name__}: {str(e)}'
+            print(f'[transcript] {err_msg}')
+            all_errors.append(err_msg)
+
+    # Method 4: Try list_transcripts API (most comprehensive for older versions)
+    if hasattr(YouTubeTranscriptApi, 'list_transcripts'):
+        try:
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+
+            # Try manually created transcripts first (higher quality)
+            try:
+                transcript = transcript_list.find_manually_created_transcript(languages)
+                text = _extract_text_from_transcript_object(transcript)
+                if text:
+                    print(f'[transcript] SUCCESS: Manual transcript extracted {len(text)} chars')
+                    return text
+            except Exception:
+                pass
+
+            # Try generated transcripts
+            try:
+                transcript = transcript_list.find_generated_transcript(languages)
+                text = _extract_text_from_transcript_object(transcript)
+                if text:
+                    print(f'[transcript] SUCCESS: Generated transcript extracted {len(text)} chars')
+                    return text
+            except Exception:
+                pass
+
+            # Try any available transcript
+            for transcript in transcript_list:
+                try:
+                    text = _extract_text_from_transcript_object(transcript)
+                    if text:
+                        print(f'[transcript] SUCCESS: Any available transcript extracted {len(text)} chars')
+                        return text
+                except Exception:
+                    continue
+        except Exception as e:
+            err_msg = f'Method 5 (list_transcripts): {type(e).__name__}: {str(e)}'
+            print(f'[transcript] {err_msg}')
+            all_errors.append(err_msg)
+
+    # Log all errors for debugging
+    print(f'[transcript] FAILED: All methods exhausted for video {video_id}')
+    for idx, err in enumerate(all_errors, 1):
+        print(f'[transcript]   Error {idx}: {err}')
 
     return None
 
@@ -588,21 +631,38 @@ def api_generate():
     language = data.get('language', 'English (Pure)')
     difficulty = data.get('difficulty', 'Medium (Standard)')
     study_depth = data.get('study_depth', '40')
+    manual_transcript = data.get('manual_transcript', '').strip()
 
     # Extract video ID
     video_id = extract_video_id(url)
-    if not video_id:
+    if not video_id and not manual_transcript:
         return jsonify({'error': 'Invalid YouTube URL. Please paste a valid YouTube video link.'}), 400
 
-    # Get transcript
-    transcript = get_transcript(video_id)
-    if not transcript:
-        return jsonify({'error': 'Could not extract transcript. The video may not have captions/subtitles enabled.'}), 400
+    # Get transcript (auto-extract or use manual)
+    transcript = None
+    if manual_transcript:
+        transcript = manual_transcript
+        print(f'[transcript] Using manual transcript: {len(transcript)} chars')
+    elif video_id:
+        transcript = get_transcript(video_id)
+        if not transcript:
+            # Provide detailed error with helpful info
+            error_msg = (
+                'Could not extract transcript from this video. '
+                'This usually means the video does not have captions/subtitles available. '
+                'Try: (1) Choose a video with captions, (2) Upload a PDF/PPT instead, '
+                'or (3) Check if the video is publicly accessible.'
+            )
+            print(f'[transcript] Failed for video_id: {video_id}, URL: {url}')
+            return jsonify({'error': error_msg, 'video_id': video_id}), 400
+
+    if not transcript or len(transcript.strip()) < 50:
+        return jsonify({'error': 'Transcript is too short or empty. Please try a different video or upload a document.'}), 400
 
     # Check cache — if we already generated notes for this URL, reuse them
     try:
         cached_data, cached_key = find_study_data_by_url(url)
-        if cached_data and cached_key:
+        if cached_data and cached_key and not manual_transcript:
             session['data_key'] = cached_key
             _cache_store(cached_key, cached_data, url)
             email = session.get('user_email')

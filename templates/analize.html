@@ -157,13 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = localStorage.getItem('studysnap_url') || '';
     const uploadMode = localStorage.getItem('studysnap_upload_mode') || '';
     const fileKey = localStorage.getItem('studysnap_file_key') || '';
+    const manualTranscript = localStorage.getItem('studysnap_manual_transcript') || '';
     const exam_mode = localStorage.getItem('studysnap_exam_mode') || 'College/University';
     const language = localStorage.getItem('studysnap_language') || 'English (Pure)';
     const difficulty = localStorage.getItem('studysnap_difficulty') || 'Medium (Standard)';
     const study_depth = localStorage.getItem('studysnap_study_depth') || '40';
 
-    if (!url && !uploadMode) {
-        alert('No video URL or file found. Please go back and provide input.');
+    if (!url && !uploadMode && !manualTranscript) {
+        alert('No video URL, file, or transcript found. Please go back and provide input.');
         window.location.href = '/';
         return;
     }
@@ -203,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiUrl = isFileMode ? '/api/generate-from-file' : '/api/generate';
     const apiBody = isFileMode
         ? JSON.stringify({ file_key: fileKey, exam_mode, language, difficulty, study_depth })
-        : JSON.stringify({ url, exam_mode, language, difficulty, study_depth });
+        : JSON.stringify({ url, exam_mode, language, difficulty, study_depth, manual_transcript: manualTranscript });
 
     // Call the API
     fetch(apiUrl, {
@@ -231,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('studysnap_paper');
             localStorage.removeItem('studysnap_upload_mode');
             localStorage.removeItem('studysnap_file_key');
+            localStorage.removeItem('studysnap_manual_transcript');
             setTimeout(() => { window.location.href = '/summary'; }, 800);
         } else {
             alert('Error: ' + (data.error || 'Something went wrong. Please try again.'));
