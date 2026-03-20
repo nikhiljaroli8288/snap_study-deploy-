@@ -2,7 +2,7 @@ flask==3.0.0
 gunicorn==21.2.0
 python-dotenv==1.0.0
 google-genai==1.0.0
-youtube-transcript-api>=0.6.2
+youtube-transcript-api==1.2.4
 pymongo[srv]==4.6.1
 certifi==2024.2.2
 pypdf==4.0.1
