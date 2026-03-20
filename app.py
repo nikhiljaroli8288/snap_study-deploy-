@@ -171,96 +171,64 @@ def _extract_text_from_transcript_object(transcript_obj):
 
 
 def get_transcript(video_id):
-    """Get transcript text from a YouTube video. Robust implementation with multiple fallbacks."""
+    """Get transcript text from a YouTube video using correct API."""
 
-    # Method 1: Try the direct fetch method
+    # Method 1: Use the standard get_transcript() static method
     try:
-        api = YouTubeTranscriptApi()
-        transcript = api.fetch(video_id)
-        if hasattr(transcript, 'snippets') and transcript.snippets:
+        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+        if isinstance(transcript_list, list) and len(transcript_list) > 0:
             text_parts = []
-            for snippet in transcript.snippets:
-                if hasattr(snippet, 'text'):
-                    text_parts.append(snippet.text.strip())
+            for item in transcript_list:
+                if isinstance(item, dict) and 'text' in item:
+                    text_parts.append(str(item['text']).strip())
             text = ' '.join(text_parts).strip()
             if text and len(text) > 50:
-                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using fetch method')
+                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using get_transcript()')
                 return text
     except Exception as e:
-        print(f'[transcript] fetch method failed: {type(e).__name__}: {str(e)}')
+        print(f'[transcript] get_transcript() failed: {type(e).__name__}: {str(e)}')
 
-    # Method 2: Try using the list method to get available transcripts
+    # Method 2: Try list_transcripts to get available transcripts, then fetch one
     try:
-        api = YouTubeTranscriptApi()
-        transcripts = api.list(video_id)
-
-        if hasattr(transcripts, 'transcripts') and transcripts.transcripts:
-            # Try each available transcript
-            for transcript_info in transcripts.transcripts:
+        transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
+        
+        # Try manually created transcripts first
+        if hasattr(transcripts, 'manually_created_transcripts') and transcripts.manually_created_transcripts:
+            for transcript_info in transcripts.manually_created_transcripts:
                 try:
-                    # Fetch the transcript
-                    if hasattr(transcript_info, 'fetch'):
-                        transcript = transcript_info.fetch()
-                        if hasattr(transcript, 'snippets') and transcript.snippets:
-                            text_parts = []
-                            for snippet in transcript.snippets:
-                                if hasattr(snippet, 'text'):
-                                    text_parts.append(snippet.text.strip())
-                            text = ' '.join(text_parts).strip()
-                            if text and len(text) > 50:
-                                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using list method')
-                                return text
+                    transcript_list = transcript_info.fetch()
+                    if isinstance(transcript_list, list) and len(transcript_list) > 0:
+                        text_parts = []
+                        for item in transcript_list:
+                            if isinstance(item, dict) and 'text' in item:
+                                text_parts.append(str(item['text']).strip())
+                        text = ' '.join(text_parts).strip()
+                        if text and len(text) > 50:
+                            print(f'[transcript] SUCCESS: Extracted {len(text)} characters from manual transcript')
+                            return text
                 except Exception as inner_e:
-                    print(f'[transcript] individual transcript failed: {inner_e}')
+                    print(f'[transcript] manual transcript fetch failed: {inner_e}')
+                    continue
+        
+        # Try generated (auto) transcripts
+        if hasattr(transcripts, 'generated_transcripts') and transcripts.generated_transcripts:
+            for transcript_info in transcripts.generated_transcripts:
+                try:
+                    transcript_list = transcript_info.fetch()
+                    if isinstance(transcript_list, list) and len(transcript_list) > 0:
+                        text_parts = []
+                        for item in transcript_list:
+                            if isinstance(item, dict) and 'text' in item:
+                                text_parts.append(str(item['text']).strip())
+                        text = ' '.join(text_parts).strip()
+                        if text and len(text) > 50:
+                            print(f'[transcript] SUCCESS: Extracted {len(text)} characters from generated transcript')
+                            return text
+                except Exception as inner_e:
+                    print(f'[transcript] generated transcript fetch failed: {inner_e}')
                     continue
     except Exception as e:
-        print(f'[transcript] list method failed: {type(e).__name__}: {str(e)}')
-
-    # Method 3: Try direct instantiation approach (fallback)
-    try:
-        # Maybe the API needs to be used differently
-        result = YouTubeTranscriptApi().fetch(video_id)
-
-        # Handle different possible response structures
-        if hasattr(result, 'fetch') and callable(result.fetch):
-            actual_transcript = result.fetch()
-        else:
-            actual_transcript = result
-
-        if hasattr(actual_transcript, 'snippets'):
-            text_parts = []
-            for snippet in actual_transcript.snippets:
-                if hasattr(snippet, 'text'):
-                    text_parts.append(snippet.text.strip())
-            text = ' '.join(text_parts).strip()
-            if text and len(text) > 50:
-                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using fallback method')
-                return text
-
-        # Maybe it's a different structure
-        if hasattr(actual_transcript, 'text'):
-            text = actual_transcript.text.strip()
-            if text and len(text) > 50:
-                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using direct text')
-                return text
-
-        # Maybe it's a list or dict
-        if isinstance(actual_transcript, (list, tuple)):
-            text_parts = []
-            for item in actual_transcript:
-                if hasattr(item, 'text'):
-                    text_parts.append(item.text.strip())
-                elif isinstance(item, dict) and 'text' in item:
-                    text_parts.append(str(item['text']).strip())
-                elif isinstance(item, str):
-                    text_parts.append(item.strip())
-            text = ' '.join(text_parts).strip()
-            if text and len(text) > 50:
-                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using list parsing')
-                return text
-
-    except Exception as e:
-        print(f'[transcript] fallback method failed: {type(e).__name__}: {str(e)}')
+        print(f'[transcript] list_transcripts() failed: {type(e).__name__}: {str(e)}')
 
     print(f'[transcript] FAILED: All methods failed for video {video_id}')
     return None
