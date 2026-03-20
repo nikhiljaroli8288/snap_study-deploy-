@@ -175,18 +175,15 @@ def get_transcript(video_id):
 
     # Method 1: Use the standard get_transcript() static method
     try:
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-        if isinstance(transcript_list, list) and len(transcript_list) > 0:
-            text_parts = []
-            for item in transcript_list:
-                if isinstance(item, dict) and 'text' in item:
-                    text_parts.append(str(item['text']).strip())
-            text = ' '.join(text_parts).strip()
-            if text and len(text) > 50:
-                print(f'[transcript] SUCCESS: Extracted {len(text)} characters using get_transcript()')
-                return text
+        transcript_result = YouTubeTranscriptApi.get_transcript(video_id)
+        text = _extract_text_from_transcript_object(transcript_result)
+        if text and len(text) > 50:
+            print(f'[transcript] SUCCESS: Extracted {len(text)} characters using get_transcript()')
+            return text
     except Exception as e:
-        print(f'[transcript] get_transcript() failed: {type(e).__name__}: {str(e)}')
+        error_msg = str(e)
+        print(f'[transcript] get_transcript() error: {type(e).__name__}: {error_msg}')
+        # Don't return yet - try fallback methods
 
     # Method 2: Try list_transcripts to get available transcripts, then fetch one
     try:
@@ -196,39 +193,32 @@ def get_transcript(video_id):
         if hasattr(transcripts, 'manually_created_transcripts') and transcripts.manually_created_transcripts:
             for transcript_info in transcripts.manually_created_transcripts:
                 try:
-                    transcript_list = transcript_info.fetch()
-                    if isinstance(transcript_list, list) and len(transcript_list) > 0:
-                        text_parts = []
-                        for item in transcript_list:
-                            if isinstance(item, dict) and 'text' in item:
-                                text_parts.append(str(item['text']).strip())
-                        text = ' '.join(text_parts).strip()
-                        if text and len(text) > 50:
-                            print(f'[transcript] SUCCESS: Extracted {len(text)} characters from manual transcript')
-                            return text
+                    transcript_result = transcript_info.fetch()
+                    text = _extract_text_from_transcript_object(transcript_result)
+                    if text and len(text) > 50:
+                        print(f'[transcript] SUCCESS: Extracted {len(text)} characters from manual transcript')
+                        return text
                 except Exception as inner_e:
-                    print(f'[transcript] manual transcript fetch failed: {inner_e}')
+                    print(f'[transcript] manual transcript fetch failed: {type(inner_e).__name__}: {str(inner_e)}')
                     continue
         
         # Try generated (auto) transcripts
         if hasattr(transcripts, 'generated_transcripts') and transcripts.generated_transcripts:
             for transcript_info in transcripts.generated_transcripts:
                 try:
-                    transcript_list = transcript_info.fetch()
-                    if isinstance(transcript_list, list) and len(transcript_list) > 0:
-                        text_parts = []
-                        for item in transcript_list:
-                            if isinstance(item, dict) and 'text' in item:
-                                text_parts.append(str(item['text']).strip())
-                        text = ' '.join(text_parts).strip()
-                        if text and len(text) > 50:
-                            print(f'[transcript] SUCCESS: Extracted {len(text)} characters from generated transcript')
-                            return text
+                    transcript_result = transcript_info.fetch()
+                    text = _extract_text_from_transcript_object(transcript_result)
+                    if text and len(text) > 50:
+                        print(f'[transcript] SUCCESS: Extracted {len(text)} characters from generated transcript')
+                        return text
                 except Exception as inner_e:
-                    print(f'[transcript] generated transcript fetch failed: {inner_e}')
+                    print(f'[transcript] generated transcript fetch failed: {type(inner_e).__name__}: {str(inner_e)}')
                     continue
+        
+        print(f'[transcript] list_transcripts found no transcripts for {video_id}')
     except Exception as e:
-        print(f'[transcript] list_transcripts() failed: {type(e).__name__}: {str(e)}')
+        error_msg = str(e)
+        print(f'[transcript] list_transcripts() error: {type(e).__name__}: {error_msg}')
 
     print(f'[transcript] FAILED: All methods failed for video {video_id}')
     return None
