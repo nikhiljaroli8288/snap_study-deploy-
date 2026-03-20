@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mock Test | StudySnap AI</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-6 flex flex-col gap-8">
+<div class="flex items-center gap-3 px-2">
+<div class="size-10 rounded-lg bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight">StudySnap AI</h1>
+<p class="text-xs text-primary font-medium uppercase tracking-wider">Pro Plan</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto pr-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('summary') }}">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Smart Summary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary active-glow transition-all" href="{{ url_for('mock') }}">
+<span class="material-symbols-outlined fill-icon">quiz</span>
+<span class="text-sm font-semibold">Mock Test</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('sample_paper') }}">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Sample Paper</span>
+</a>
+<div class="my-4 border-t border-primary/10 dark:border-slate-800"></div><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('ai') }}">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-sm font-medium">Ask AI</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('pdf') }}">
+<span class="material-symbols-outlined">download</span>
+<span class="text-sm font-medium">Download PDF</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('history') }}">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm font-medium">History</span>
+</a>
+<a class="mt-auto flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('settings') }}">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto custom-scrollbar">
+<!-- Header -->
+<header class="sticky top-0 z-10 h-16 flex items-center justify-between px-8 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">quiz</span>
+</div>
+<div>
+<h2 id="mock-title" class="font-bold text-lg">Mock Test</h2>
+<p class="text-xs text-slate-500">25 Multiple Choice Questions</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div id="score-display" class="hidden flex items-center gap-4">
+<span class="px-4 py-2 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-bold">
+✅ <span id="correct-val">0</span> Correct
+</span>
+<span class="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm font-bold">
+❌ <span id="wrong-val">0</span> Wrong
+</span>
+<span class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium">
+<span id="answered-val">0</span>/<span id="total-val">25</span> Answered
+</span>
+</div>
+</div>
+</header>
+
+<div class="max-w-4xl mx-auto px-6 py-8">
+<!-- Generate State -->
+<div id="generate-state" class="flex flex-col items-center justify-center py-20 text-center">
+<div class="size-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-5xl text-primary/50">quiz</span>
+</div>
+<h3 class="text-2xl font-bold mb-2">Ready to Test Your Knowledge?</h3>
+<p class="text-slate-500 dark:text-slate-400 mb-8 max-w-md">Generate a mock test with 25 MCQs based on your study material. Get instant feedback on every answer!</p>
+{% if has_summary %}
+<button id="generate-btn" class="px-8 py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined">auto_awesome</span>
+Generate Mock Test (25 MCQs)
+</button>
+{% else %}
+<div class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 max-w-md">
+<p class="text-amber-700 dark:text-amber-300 font-medium">⚠️ No summary available yet.</p>
+<p class="text-amber-600 dark:text-amber-400 text-sm mt-1">Please <a href="{{ url_for('home') }}" class="text-primary font-semibold hover:underline">generate a summary</a> first, then come back to take the mock test.</p>
+</div>
+{% endif %}
+</div>
+
+<!-- Loading State -->
+<div id="loading-state" class="hidden flex flex-col items-center justify-center py-20">
+<div class="relative size-20 mb-6">
+<div class="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+<div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl">psychology</span>
+</div>
+</div>
+<h3 class="text-xl font-bold mb-2">Generating Your Mock Test...</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm">AI is creating 25 unique questions from your study material</p>
+<div class="mt-4 w-64 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full animate-pulse" style="width:70%"></div>
+</div>
+</div>
+
+<!-- Error State -->
+<div id="error-state" class="hidden flex flex-col items-center justify-center py-20 text-center">
+<div class="size-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-red-500">error</span>
+</div>
+<h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Generation Failed</h3>
+<p id="error-message" class="text-slate-500 dark:text-slate-400 mb-6 max-w-md"></p>
+<button id="retry-btn" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all">Try Again</button>
+</div>
+
+<!-- Questions Container -->
+<div id="questions-container" class="hidden space-y-6"></div>
+
+<!-- Results Section -->
+<div id="results-section" class="hidden mt-8">
+<div class="bg-gradient-to-br from-primary/10 via-purple-500/10 to-primary/5 rounded-3xl border border-primary/20 p-8 text-center">
+<h3 class="text-2xl font-bold mb-2">🎉 Test Complete!</h3>
+<div class="flex items-center justify-center gap-8 my-6">
+<div class="text-center">
+<div id="final-score" class="text-5xl font-black text-primary">0</div>
+<p class="text-sm text-slate-500 font-medium mt-1">out of 25</p>
+</div>
+<div class="h-16 w-px bg-slate-200 dark:bg-slate-700"></div>
+<div class="text-center">
+<div id="final-percent" class="text-5xl font-black text-green-500">0%</div>
+<p class="text-sm text-slate-500 font-medium mt-1">Score</p>
+</div>
+</div>
+<div class="flex items-center justify-center gap-6 mb-6">
+<span class="px-4 py-2 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-bold text-sm">✅ <span id="result-correct">0</span> Correct</span>
+<span class="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold text-sm">❌ <span id="result-wrong">0</span> Wrong</span>
+</div>
+<div id="result-message" class="text-lg font-semibold mb-6"></div>
+<div class="flex items-center justify-center gap-4">
+<button id="retake-btn" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined">refresh</span> Retake Test
+</button>
+<a href="{{ url_for('summary') }}" class="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">Back to Summary</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const CURRENT_DATA_KEY = '{{ data_key }}';
+    let mockData = null;
+    let score = 0;
+    let wrongCount = 0;
+    let answered = 0;
+    let answers = {};
+
+    const generateState = document.getElementById('generate-state');
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const questionsContainer = document.getElementById('questions-container');
+    const resultsSection = document.getElementById('results-section');
+    const scoreDisplay = document.getElementById('score-display');
+    const generateBtn = document.getElementById('generate-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const retakeBtn = document.getElementById('retake-btn');
+
+    function saveState() {
+        if (!mockData) return;
+        localStorage.setItem('studysnap_mock', JSON.stringify({ mockData, answers, score, wrongCount, answered, dataKey: CURRENT_DATA_KEY }));
+    }
+
+    function restoreAnswers() {
+        Object.entries(answers).forEach(([qIdStr, selected]) => {
+            const qId = parseInt(qIdStr);
+            const q = mockData.questions.find(item => item.id === qId);
+            if (!q) return;
+            const allOptions = questionsContainer.querySelectorAll('[data-question="' + qId + '"]');
+            allOptions.forEach(opt => {
+                opt.disabled = true;
+                opt.classList.add('pointer-events-none');
+                opt.classList.remove('hover:border-primary/50', 'hover:bg-primary/5');
+            });
+            function styleBtn(btn, isCorrect) {
+                const c = isCorrect ? 'green' : 'red';
+                btn.classList.remove('border-slate-200', 'dark:border-slate-700');
+                btn.classList.add('border-' + c + '-500', 'bg-' + c + '-50', 'dark:bg-' + c + '-900/20');
+                btn.querySelector('.option-label').classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-400');
+                btn.querySelector('.option-label').classList.add('bg-' + c + '-500', 'text-white');
+                const icon = document.createElement('span');
+                icon.className = 'material-symbols-outlined text-' + c + '-500 ml-auto flex-shrink-0';
+                icon.textContent = isCorrect ? 'check_circle' : 'cancel';
+                btn.appendChild(icon);
+            }
+            const selBtn = questionsContainer.querySelector('[data-question="' + qId + '"][data-option="' + selected + '"]');
+            if (selected === q.correct) {
+                if (selBtn) styleBtn(selBtn, true);
+            } else {
+                if (selBtn) styleBtn(selBtn, false);
+                const corrBtn = questionsContainer.querySelector('[data-question="' + qId + '"][data-option="' + q.correct + '"]');
+                if (corrBtn) styleBtn(corrBtn, true);
+            }
+            const expEl = document.getElementById('exp-' + qId);
+            if (expEl) expEl.classList.remove('hidden');
+        });
+    }
+
+    function restoreState() {
+        const saved = localStorage.getItem('studysnap_mock');
+        if (!saved) return false;
+        try {
+            const state = JSON.parse(saved);
+            if (!state.mockData || !state.mockData.questions) return false;
+            // Check if cached data belongs to current topic
+            if (state.dataKey && state.dataKey !== CURRENT_DATA_KEY) {
+                localStorage.removeItem('studysnap_mock');
+                localStorage.removeItem('studysnap_mock_job');
+                return false;
+            }
+            mockData = state.mockData;
+            score = state.score || 0;
+            wrongCount = state.wrongCount || 0;
+            answered = state.answered || 0;
+            answers = state.answers || {};
+            const totalEl = document.getElementById('total-val');
+            if (totalEl) totalEl.textContent = mockData.questions.length;
+            renderQuestions();
+            restoreAnswers();
+            showState(questionsContainer);
+            scoreDisplay.classList.remove('hidden');
+            updateScoreDisplay();
+            document.getElementById('mock-title').textContent = mockData.title || 'Mock Test';
+            if (answered === mockData.questions.length) showResults();
+            return true;
+        } catch(e) { localStorage.removeItem('studysnap_mock'); return false; }
+    }
+
+    function escapeHtml(text) {
+        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showState(state) {
+        [generateState, loadingState, errorState, questionsContainer, resultsSection].forEach(el => {
+            if (el) el.classList.add('hidden');
+        });
+        if (state) state.classList.remove('hidden');
+    }
+
+    function handleMockResult(data) {
+        if (data && data.questions && data.questions.length > 0) {
+            mockData = data;
+            score = 0; wrongCount = 0; answered = 0; answers = {};
+            const totalEl = document.getElementById('total-val');
+            if (totalEl) totalEl.textContent = mockData.questions.length;
+            renderQuestions();
+            showState(questionsContainer);
+            scoreDisplay.classList.remove('hidden');
+            updateScoreDisplay();
+            document.getElementById('mock-title').textContent = mockData.title || 'Mock Test';
+            saveState();
+        } else {
+            document.getElementById('error-message').textContent = 'Failed to generate questions. Please try again.';
+            showState(errorState);
+        }
+    }
+
+    let _mockPollTimer = null;
+    function pollMockJob(jobId) {
+        if (_mockPollTimer) clearInterval(_mockPollTimer);
+        _mockPollTimer = setInterval(async () => {
+            try {
+                const res = await fetch('/api/job/' + jobId);
+                const job = await res.json();
+                if (job.status === 'done') {
+                    clearInterval(_mockPollTimer); _mockPollTimer = null;
+                    localStorage.removeItem('studysnap_mock_job');
+                    handleMockResult(job.data);
+                } else if (job.status === 'error' || job.status === 'not_found') {
+                    clearInterval(_mockPollTimer); _mockPollTimer = null;
+                    localStorage.removeItem('studysnap_mock_job');
+                    document.getElementById('error-message').textContent = job.error || 'Failed to generate questions. Please try again.';
+                    showState(errorState);
+                }
+            } catch(e) { /* network hiccup – keep polling */ }
+        }, 2000);
+    }
+
+    async function generateMockTest() {
+        showState(loadingState);
+        try {
+            const res = await fetch('/api/mock-generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            const data = await res.json();
+            if (data.job_id) {
+                localStorage.setItem('studysnap_mock_job', data.job_id);
+                pollMockJob(data.job_id);
+            } else {
+                document.getElementById('error-message').textContent = data.error || 'Failed to start generation. Please try again.';
+                showState(errorState);
+            }
+        } catch (err) {
+            document.getElementById('error-message').textContent = 'Network error. Please check your connection and try again.';
+            showState(errorState);
+        }
+    }
+
+    function renderQuestions() {
+        questionsContainer.innerHTML = '';
+        mockData.questions.forEach(q => {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm';
+            card.id = 'q-' + q.id;
+
+            // Question header
+            const header = document.createElement('div');
+            header.className = 'flex items-start gap-3 mb-5';
+            const numBadge = document.createElement('span');
+            numBadge.className = 'flex-shrink-0 size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-sm font-bold';
+            numBadge.textContent = q.id;
+            const qText = document.createElement('p');
+            qText.className = 'text-lg font-semibold text-slate-800 dark:text-slate-200 leading-relaxed';
+            qText.textContent = q.question;
+            header.appendChild(numBadge);
+            header.appendChild(qText);
+            card.appendChild(header);
+
+            // Options
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'grid grid-cols-1 gap-3 ml-12';
+            const optionKeys = ['A','B','C','D'];
+            optionKeys.forEach(key => {
+                if (!q.options[key]) return;
+                const btn = document.createElement('button');
+                btn.className = 'option-btn flex items-center gap-4 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group';
+                btn.dataset.question = q.id;
+                btn.dataset.option = key;
+
+                const label = document.createElement('span');
+                label.className = 'option-label flex-shrink-0 size-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm group-hover:bg-primary/20 group-hover:text-primary transition-colors';
+                label.textContent = key;
+
+                const text = document.createElement('span');
+                text.className = 'flex-1 text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors';
+                text.textContent = q.options[key];
+
+                btn.appendChild(label);
+                btn.appendChild(text);
+                optionsDiv.appendChild(btn);
+            });
+            card.appendChild(optionsDiv);
+
+            // Explanation (hidden initially)
+            const expDiv = document.createElement('div');
+            expDiv.id = 'exp-' + q.id;
+            expDiv.className = 'hidden ml-12 mt-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800';
+            const expInner = document.createElement('div');
+            expInner.className = 'flex items-start gap-2';
+            expInner.innerHTML = '<span class="material-symbols-outlined text-blue-500 text-lg mt-0.5 flex-shrink-0">lightbulb</span>';
+            const expText = document.createElement('p');
+            expText.className = 'text-sm text-blue-700 dark:text-blue-300 leading-relaxed';
+            expText.textContent = q.explanation || '';
+            expInner.appendChild(expText);
+            expDiv.appendChild(expInner);
+            card.appendChild(expDiv);
+
+            questionsContainer.appendChild(card);
+        });
+    }
+
+    // Event delegation for option clicks
+    questionsContainer.addEventListener('click', function(e) {
+        const btn = e.target.closest('.option-btn');
+        if (!btn || btn.disabled) return;
+
+        const qId = parseInt(btn.dataset.question);
+        const selected = btn.dataset.option;
+        const q = mockData.questions.find(item => item.id === qId);
+        if (!q) return;
+
+        // Lock all options for this question
+        const allOptions = this.querySelectorAll('[data-question="' + qId + '"]');
+        allOptions.forEach(opt => {
+            opt.disabled = true;
+            opt.classList.add('pointer-events-none');
+            opt.classList.remove('hover:border-primary/50', 'hover:bg-primary/5');
+        });
+
+        answered++;
+        answers[qId] = selected;
+
+        if (selected === q.correct) {
+            // Correct answer - green
+            score++;
+            btn.classList.remove('border-slate-200', 'dark:border-slate-700');
+            btn.classList.add('border-green-500', 'bg-green-50', 'dark:bg-green-900/20');
+            btn.querySelector('.option-label').classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-400');
+            btn.querySelector('.option-label').classList.add('bg-green-500', 'text-white');
+            const check = document.createElement('span');
+            check.className = 'material-symbols-outlined text-green-500 ml-auto flex-shrink-0';
+            check.textContent = 'check_circle';
+            btn.appendChild(check);
+        } else {
+            // Wrong answer - red for selected
+            wrongCount++;
+            btn.classList.remove('border-slate-200', 'dark:border-slate-700');
+            btn.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-900/20');
+            btn.querySelector('.option-label').classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-400');
+            btn.querySelector('.option-label').classList.add('bg-red-500', 'text-white');
+            const cross = document.createElement('span');
+            cross.className = 'material-symbols-outlined text-red-500 ml-auto flex-shrink-0';
+            cross.textContent = 'cancel';
+            btn.appendChild(cross);
+
+            // Show correct answer - green
+            const correctBtn = this.querySelector('[data-question="' + qId + '"][data-option="' + q.correct + '"]');
+            if (correctBtn) {
+                correctBtn.classList.remove('border-slate-200', 'dark:border-slate-700');
+                correctBtn.classList.add('border-green-500', 'bg-green-50', 'dark:bg-green-900/20');
+                correctBtn.querySelector('.option-label').classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-400');
+                correctBtn.querySelector('.option-label').classList.add('bg-green-500', 'text-white');
+                const check = document.createElement('span');
+                check.className = 'material-symbols-outlined text-green-500 ml-auto flex-shrink-0';
+                check.textContent = 'check_circle';
+                correctBtn.appendChild(check);
+            }
+        }
+
+        // Show explanation
+        const expEl = document.getElementById('exp-' + qId);
+        if (expEl) expEl.classList.remove('hidden');
+
+        updateScoreDisplay();
+        saveState();
+
+        // If all answered, show results
+        if (answered === mockData.questions.length) {
+            setTimeout(showResults, 800);
+        }
+    });
+
+    function updateScoreDisplay() {
+        document.getElementById('correct-val').textContent = score;
+        document.getElementById('wrong-val').textContent = wrongCount;
+        document.getElementById('answered-val').textContent = answered;
+    }
+
+    function showResults() {
+        resultsSection.classList.remove('hidden');
+        const total = mockData.questions.length;
+        const percent = Math.round((score / total) * 100);
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('final-percent').textContent = percent + '%';
+        document.getElementById('result-correct').textContent = score;
+        document.getElementById('result-wrong').textContent = wrongCount;
+
+        const msgEl = document.getElementById('result-message');
+        if (percent >= 80) {
+            msgEl.textContent = '🌟 Excellent! You have a strong understanding of this topic!';
+            msgEl.className = 'text-lg font-semibold mb-6 text-green-600 dark:text-green-400';
+        } else if (percent >= 60) {
+            msgEl.textContent = '👍 Good job! Review the explanations for questions you missed.';
+            msgEl.className = 'text-lg font-semibold mb-6 text-blue-600 dark:text-blue-400';
+        } else if (percent >= 40) {
+            msgEl.textContent = '📚 Keep studying! Focus on the topics where you struggled.';
+            msgEl.className = 'text-lg font-semibold mb-6 text-amber-600 dark:text-amber-400';
+        } else {
+            msgEl.textContent = '💪 Don\'t give up! Review the summary and try again.';
+            msgEl.className = 'text-lg font-semibold mb-6 text-red-600 dark:text-red-400';
+        }
+
+        resultsSection.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+
+    // Check for active generation job (survives tab switches), then restore saved state
+    const activeJob = localStorage.getItem('studysnap_mock_job');
+    if (activeJob) {
+        showState(loadingState);
+        pollMockJob(activeJob);
+    } else {
+        restoreState();
+    }
+
+    // Button event listeners
+    if (generateBtn) generateBtn.addEventListener('click', generateMockTest);
+    if (retryBtn) retryBtn.addEventListener('click', generateMockTest);
+    if (retakeBtn) retakeBtn.addEventListener('click', () => {
+        localStorage.removeItem('studysnap_mock');
+        if (_mockPollTimer) { clearInterval(_mockPollTimer); _mockPollTimer = null; }
+        answers = {};
+        score = 0; wrongCount = 0; answered = 0;
+        showState(null);
+        generateMockTest();
+    });
+});
+</script>
+</body></html>

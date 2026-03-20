@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StudySnap AI - Home</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+<!-- Background Elements -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+<div class="floating-glow top-[-10%] left-[-10%]" style="background: radial-gradient(circle, rgba(72, 143, 229, 0.12) 0%, transparent 70%);"></div>
+<div class="floating-glow bottom-[10%] right-[-5%]" style="background: radial-gradient(circle, rgba(124, 78, 229, 0.08) 0%, transparent 70%);"></div>
+<div class="floating-glow top-[20%] right-[10%]" style="background: radial-gradient(circle, rgba(72, 143, 229, 0.05) 0%, transparent 70%);"></div>
+</div>
+<!-- TopNavBar -->
+<nav class="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-20 items-center">
+<div class="flex items-center gap-3">
+<a href="{{ url_for('home') }}" class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center glow-effect">
+<span class="material-symbols-outlined text-white">auto_awesome</span>
+</div>
+<span class="text-2xl font-black tracking-tight text-gradient-primary">StudySnap AI</span>
+</a>
+</div>
+<div class="hidden md:flex items-center gap-8">
+
+  <!-- Features dropdown -->
+  <div class="relative group">
+    <button class="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors focus:outline-none">
+      Features
+      <span class="material-symbols-outlined text-base transition-transform group-hover:rotate-180" style="font-size:16px;">expand_more</span>
+    </button>
+    <div class="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-72 rounded-xl shadow-lg border border-primary/10 bg-white dark:bg-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-4 flex flex-col gap-3">
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">quiz</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Instant Quizzes</p><p class="text-xs text-slate-500 dark:text-slate-400">Generate quick AI quizzes from video content.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">picture_as_pdf</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Export Ready</p><p class="text-xs text-slate-500 dark:text-slate-400">Download structured PDF notes with summaries.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">translate</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Multi-Lingual</p><p class="text-xs text-slate-500 dark:text-slate-400">Get notes in Hindi or English automatically.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">style</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Revision Mode</p><p class="text-xs text-slate-500 dark:text-slate-400">Quick flashcards and bullet points for fast revision.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works dropdown -->
+  <div class="relative group">
+    <button class="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors focus:outline-none">
+      How It Works
+      <span class="material-symbols-outlined text-base transition-transform group-hover:rotate-180" style="font-size:16px;">expand_more</span>
+    </button>
+    <div class="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-72 rounded-xl shadow-lg border border-primary/10 bg-white dark:bg-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-4 flex flex-col gap-3">
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">upload</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Upload Video / Link</p><p class="text-xs text-slate-500 dark:text-slate-400">Add the lecture video or YouTube link.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">smart_toy</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">AI Processing</p><p class="text-xs text-slate-500 dark:text-slate-400">The system analyzes the content and extracts key concepts.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">auto_awesome</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Generate Notes &amp; Quiz</p><p class="text-xs text-slate-500 dark:text-slate-400">Get structured notes, summaries, and quizzes instantly.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">download</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Download &amp; Revise</p><p class="text-xs text-slate-500 dark:text-slate-400">Export notes as PDF or revise with flashcards.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing dropdown -->
+  <div class="relative group">
+    <button class="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors focus:outline-none">
+      Pricing
+      <span class="material-symbols-outlined text-base transition-transform group-hover:rotate-180" style="font-size:16px;">expand_more</span>
+    </button>
+    <div class="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-72 rounded-xl shadow-lg border border-primary/10 bg-white dark:bg-slate-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-4 flex flex-col gap-3">
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">card_giftcard</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Free Access</p><p class="text-xs text-slate-500 dark:text-slate-400">Get 20 free uses to try all features.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">payments</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Pay As You Go</p><p class="text-xs text-slate-500 dark:text-slate-400">After free uses, pay only when you generate new notes.</p></div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="material-symbols-outlined text-primary mt-0.5" style="font-size:20px;">all_inclusive</span>
+        <div><p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Unlimited Learning</p><p class="text-xs text-slate-500 dark:text-slate-400">No subscription required, pay per use.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="flex items-center gap-4">
+<button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span id="theme-toggle-icon" class="material-symbols-outlined">dark_mode</span>
+</button>
+<div class="h-6 w-[1px] bg-primary/20 hidden sm:block"></div>
+<a class="hidden sm:block text-sm font-bold hover:text-primary px-4 py-2" href="{{ url_for('signin') }}">Login</a>
+<a class="hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/25 transition-all bg-gradient-primary" href="{{ url_for('signup') }}">SignUp</a>
+</div>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<main class="max-w-7xl mx-auto px-4 pt-16 pb-24 sm:px-6 lg:px-8">
+<div class="text-center max-w-4xl mx-auto mb-16">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-6">
+<span class="material-symbols-outlined text-sm">bolt</span> Next-Gen Learning AI
+            </div>
+<h1 class="text-5xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tight">
+                Turn Any YouTube Video Into <span class="text-gradient-primary">Smart Study Notes</span> Instantly
+            </h1>
+<p class="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium">
+                Summary <span class="mx-2 text-primary/30">|</span> 
+                Mock Test <span class="mx-2 text-primary/30">|</span> 
+                Hindi Notes <span class="mx-2 text-primary/30">|</span> 
+                Exam Mode <span class="mx-2 text-primary/30">|</span> 
+                PDF Download
+            </p>
+</div>
+<!-- Main Tool Card -->
+<div class="max-w-5xl mx-auto glass-card rounded-xl p-8 md:p-12 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-9xl">school</span>
+</div>
+<div class="flex flex-col gap-10">
+<!-- URL Input -->
+<div class="relative">
+<label class="block text-sm font-bold mb-3 ml-1 uppercase tracking-widest text-slate-600 dark:text-slate-400">Step 1: Paste YouTube Link OR Upload PDF/PPT</label>
+<div class="flex flex-col gap-4">
+<div class="relative flex-1">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary">link</span>
+</div>
+<input id="content-url" class="w-full pl-12 pr-4 py-5 border border-primary/20 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-lg bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500" placeholder="https://www.youtube.com/watch?v=..." type="text"/>
+</div>
+<!-- OR Divider -->
+<div class="flex items-center gap-4">
+<div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+<span class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">OR</span>
+<div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+</div>
+<!-- File Upload -->
+<div class="relative">
+<label id="file-upload-label" for="file-upload" class="flex items-center justify-center gap-3 w-full py-5 border-2 border-dashed border-primary/30 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all bg-white dark:bg-slate-800">
+<span class="material-symbols-outlined text-primary text-2xl">upload_file</span>
+<div class="text-center">
+<p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Upload PDF or PPT file</p>
+<p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Supports .pdf, .pptx files</p>
+</div>
+</label>
+<input id="file-upload" type="file" accept=".pdf,.pptx,.ppt" class="hidden"/>
+<!-- Selected file indicator -->
+<div id="file-selected" class="hidden mt-3 flex items-center justify-between px-4 py-3 rounded-xl bg-primary/10 border border-primary/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">description</span>
+<span id="file-name" class="text-sm font-semibold text-primary truncate max-w-xs"></span>
+</div>
+<button id="file-remove" type="button" class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Customization Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div>
+<label class="block text-xs font-black mb-3 ml-1 uppercase tracking-widest text-slate-600 dark:text-slate-400">Exam Mode</label>
+<div class="relative">
+<select id="exam-mode-select" class="w-full appearance-none border border-primary/20 dark:border-slate-700 rounded-xl px-4 py-4 pr-10 focus:ring-2 focus:ring-primary outline-none cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-100">
+<option>Competitive (UPSC/JEE)</option>
+<option>College/University</option>
+<option>High School</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-primary">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-xs font-black mb-3 ml-1 uppercase tracking-widest text-slate-600 dark:text-slate-400">Output Language</label>
+<div class="relative">
+<select id="language-select" class="w-full appearance-none border border-primary/20 dark:border-slate-700 rounded-xl px-4 py-4 pr-10 focus:ring-2 focus:ring-primary outline-none cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-100">
+<option>English (Pure)</option>
+<option>Hinglish (Mix)</option>
+<option>Hindi (हिंदी)</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-primary">
+<span class="material-symbols-outlined">translate</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-xs font-black mb-3 ml-1 uppercase tracking-widest text-slate-600 dark:text-slate-400">Difficulty</label>
+<div class="relative">
+<select id="difficulty-select" class="w-full appearance-none border border-primary/20 dark:border-slate-700 rounded-xl px-4 py-4 pr-10 focus:ring-2 focus:ring-primary outline-none cursor-pointer bg-white dark:bg-slate-800 dark:text-slate-100">
+<option>Medium (Standard)</option>
+<option>Easy (Beginner)</option>
+<option>Hard (Advanced)</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-primary">
+<span class="material-symbols-outlined">signal_cellular_alt</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Time Mode Buttons -->
+<div>
+<label class="block text-xs font-black mb-3 ml-1 uppercase tracking-widest text-center md:text-left text-slate-600 dark:text-slate-400">Select Study Depth</label>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="study-depth-options">
+<button class="study-depth-btn flex items-center justify-center gap-3 p-4 rounded-xl border border-primary/20 hover:border-primary bg-primary/5 transition-all group" data-depth="20">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">timer</span>
+<div class="text-left">
+<p class="text-sm font-bold">20 Min Quick</p>
+<p class="text-[10px] text-slate-500 dark:text-slate-400">Essential highlights</p>
+</div>
+</button>
+<button class="study-depth-btn flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-primary bg-primary/5 transition-all group" data-depth="40">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">smart_toy</span>
+<div class="text-left">
+<p class="text-sm font-bold">40 Min Smart</p>
+<p class="text-[10px] text-slate-500 dark:text-slate-400">Most popular depth</p>
+</div>
+</button>
+<button class="study-depth-btn flex items-center justify-center gap-3 p-4 rounded-xl border border-primary/20 hover:border-primary bg-primary/5 transition-all group" data-depth="full">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">menu_book</span>
+<div class="text-left">
+<p class="text-sm font-bold">Full Deep Study</p>
+<p class="text-[10px] text-slate-500 dark:text-slate-400">Every single detail</p>
+</div>
+</button>
+</div>
+</div>
+<!-- Final Action -->
+<div class="pt-4">
+<button id="generate-btn" disabled class="w-full group bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 py-6 rounded-xl font-black text-xl flex items-center justify-center gap-3 transition-all cursor-not-allowed">
+<span class="material-symbols-outlined text-3xl">generating_tokens</span>
+                        GENERATE STUDY PACK
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('content-url');
+    const button = document.getElementById('generate-btn');
+    const fileUpload = document.getElementById('file-upload');
+    const fileSelected = document.getElementById('file-selected');
+    const fileName = document.getElementById('file-name');
+    const fileRemove = document.getElementById('file-remove');
+    const fileLabel = document.getElementById('file-upload-label');
+    let uploadedFile = null;
+
+    function hasInput() {
+        return input.value.trim() !== '' || uploadedFile !== null;
+    }
+
+    function updateButtonState() {
+        if (hasInput()) {
+            button.disabled = false;
+            button.classList.remove('bg-slate-300', 'dark:bg-slate-700', 'text-slate-500', 'dark:text-slate-400', 'cursor-not-allowed');
+            button.classList.add('bg-gradient-primary', 'text-white', 'hover:bg-primary/90', 'shadow-[0_0_30px_rgba(145,75,226,0.5)]', 'active:scale-95');
+        } else {
+            button.disabled = true;
+            button.classList.add('bg-slate-300', 'dark:bg-slate-700', 'text-slate-500', 'dark:text-slate-400', 'cursor-not-allowed');
+            button.classList.remove('bg-gradient-primary', 'text-white', 'hover:bg-primary/90', 'shadow-[0_0_30px_rgba(145,75,226,0.5)]', 'active:scale-95');
+        }
+    }
+
+    input.addEventListener('input', () => {
+        // If user types a URL, clear file upload
+        if (input.value.trim() !== '' && uploadedFile) {
+            uploadedFile = null;
+            fileUpload.value = '';
+            fileSelected.classList.add('hidden');
+            fileLabel.classList.remove('hidden');
+        }
+        updateButtonState();
+    });
+
+    fileUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!['pdf', 'pptx', 'ppt'].includes(ext)) {
+                alert('Please upload a PDF or PPT/PPTX file.');
+                fileUpload.value = '';
+                return;
+            }
+            uploadedFile = file;
+            fileName.textContent = file.name;
+            fileSelected.classList.remove('hidden');
+            fileLabel.classList.add('hidden');
+            // Clear URL input when file is selected
+            input.value = '';
+            updateButtonState();
+        }
+    });
+
+    fileRemove.addEventListener('click', () => {
+        uploadedFile = null;
+        fileUpload.value = '';
+        fileSelected.classList.add('hidden');
+        fileLabel.classList.remove('hidden');
+        updateButtonState();
+    });
+
+    // ── Study depth button toggle ────────────────────────────
+    const depthBtns = document.querySelectorAll('.study-depth-btn');
+    depthBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            depthBtns.forEach(b => {
+                b.classList.remove('border-2', 'border-primary');
+                b.classList.add('border', 'border-primary/20');
+            });
+            btn.classList.remove('border', 'border-primary/20');
+            btn.classList.add('border-2', 'border-primary');
+        });
+    });
+
+    button.addEventListener('click', () => {
+        if (button.disabled) return;
+        if (!hasInput()) {
+            alert('Please paste a YouTube link or upload a PDF/PPT file.');
+            return;
+        }
+
+        const examMode = document.getElementById('exam-mode-select').value;
+        const language = document.getElementById('language-select').value;
+        const difficulty = document.getElementById('difficulty-select').value;
+        const selectedDepth = document.querySelector('.study-depth-btn.border-2');
+        const studyDepth = selectedDepth ? selectedDepth.dataset.depth : '40';
+
+        if (uploadedFile) {
+            // Upload the file first, then redirect to analyze page
+            const formData = new FormData();
+            formData.append('file', uploadedFile);
+            formData.append('exam_mode', examMode);
+            formData.append('language', language);
+            formData.append('difficulty', difficulty);
+            formData.append('study_depth', studyDepth);
+
+            // Store settings for analyze page
+            localStorage.setItem('studysnap_url', '');
+            localStorage.setItem('studysnap_upload_mode', 'true');
+            localStorage.setItem('studysnap_exam_mode', examMode);
+            localStorage.setItem('studysnap_language', language);
+            localStorage.setItem('studysnap_difficulty', difficulty);
+            localStorage.setItem('studysnap_study_depth', studyDepth);
+
+            // Upload file and get a file key, then go to analyze
+            button.disabled = true;
+            button.innerHTML = '<span class="material-symbols-outlined text-3xl animate-spin">refresh</span> Uploading file...';
+
+            fetch('/api/upload-file', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('studysnap_file_key', data.file_key);
+                    window.location.href = "{{ url_for('analize') }}";
+                } else {
+                    alert('Error: ' + (data.error || 'File upload failed.'));
+                    updateButtonState();
+                    button.innerHTML = '<span class="material-symbols-outlined text-3xl">generating_tokens</span> GENERATE STUDY PACK <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>';
+                }
+            })
+            .catch(err => {
+                alert('Upload failed: ' + err.message);
+                updateButtonState();
+                button.innerHTML = '<span class="material-symbols-outlined text-3xl">generating_tokens</span> GENERATE STUDY PACK <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>';
+            });
+        } else {
+            // YouTube URL mode — same as before
+            localStorage.setItem('studysnap_url', input.value.trim());
+            localStorage.setItem('studysnap_upload_mode', '');
+            localStorage.setItem('studysnap_file_key', '');
+            localStorage.setItem('studysnap_exam_mode', examMode);
+            localStorage.setItem('studysnap_language', language);
+            localStorage.setItem('studysnap_difficulty', difficulty);
+            localStorage.setItem('studysnap_study_depth', studyDepth);
+            window.location.href = "{{ url_for('analize') }}";
+        }
+    });
+});
+</script>
+<p class="text-center mt-6 text-slate-400 dark:text-slate-500 text-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">verified_user</span> 
+                        Processing powered by GPT-4o &amp; specialized academic models
+                    </p>
+</div>
+</div>
+</div>
+<!-- Features Mini-Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-24">
+<div class="text-center p-6">
+<div class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+<span class="material-symbols-outlined text-blue-500">quiz</span>
+</div>
+<h3 class="font-bold mb-2">Instant Quizzes</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">AI-generated mock tests based on video content.</p>
+</div>
+<div class="text-center p-6">
+<div class="w-12 h-12 bg-teal-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+<span class="material-symbols-outlined text-teal-500">picture_as_pdf</span>
+</div>
+<h3 class="font-bold mb-2">Export Ready</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Download formatted PDFs with diagrams and summaries.</p>
+</div>
+<div class="text-center p-6">
+<div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+<span class="material-symbols-outlined text-purple-500">language</span>
+</div>
+<h3 class="font-bold mb-2">Multi-Lingual</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Get notes in Hindi or English, regardless of video audio.</p>
+</div>
+<div class="text-center p-6">
+<div class="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+<span class="material-symbols-outlined text-orange-500">history_edu</span>
+</div>
+<h3 class="font-bold mb-2">Revision Mode</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Flashcards and bullet points for last-minute prep.</p>
+</div>
+</div>
+</main>
+<!-- Footer Space -->
+<footer class="border-t border-primary/10 py-12 mt-12 bg-white/50 dark:bg-slate-900/50">
+<div class="max-w-7xl mx-auto px-4 text-center">
+<div class="flex items-center justify-center gap-2 mb-6 opacity-50">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-bold uppercase tracking-widest text-xs">Empowering 500,000+ Students</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm">&copy; 2024 StudySnap AI. Built for the future of education.</p>
+</div>
+</footer>
+</body></html>

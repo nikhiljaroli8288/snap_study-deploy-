@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign Up | StudySnap AI</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display transition-colors duration-300">
+<!-- Top Navigation Bar -->
+<header class="w-full px-6 py-4 flex items-center justify-between bg-white/50 dark:bg-background-dark/50 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-50">
+<a href="{{ url_for('home') }}" class="flex items-center gap-2">
+<div class="flex items-center gap-2">
+<div class="p-2 bg-primary rounded-lg text-white">
+<svg class="w-6 h-6" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold tracking-tight">StudySnap AI</h2>
+</div>
+</a>
+<div class="flex items-center gap-4">
+<a class="text-slate-600 dark:text-slate-400 text-sm font-semibold hover:text-primary transition-colors" href="#">Help Center</a>
+<button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span id="theme-toggle-icon" class="material-symbols-outlined">dark_mode</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex items-center justify-center p-6 bg-gradient-mesh relative overflow-hidden">
+<!-- Abstract background elements for depth -->
+<div class="absolute top-1/4 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+<div class="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
+<!-- Registration Card -->
+<div class="w-full max-w-[520px] glass-card rounded-xl shadow-2xl p-8 md:p-12 relative z-10 border border-white/40">
+<div class="text-center mb-10">
+<h1 class="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-2">Create Account</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base">Join 10,000+ students using AI to excel</p>
+</div>
+<!-- Social Auth Buttons -->
+<div class="grid grid-cols-2 gap-4 mb-8">
+<button class="flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-slate-700 dark:text-slate-200 font-medium text-sm">
+<img alt="Google" class="w-5 h-5" data-alt="Google colorful logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX8hYqg4CNqmOOvyNwi3-_6TL0eQpOqPTn3pzfOXEQHu_flKOxi3TjOC98fS8BPOg873ILFfamYv8xjFuvSbCsaaJv5Av3RH-xORKguxyAmCrEuVT-tetM2mxnTs58GkMwNQmMdH95a-VC1aJEKIyabXrefwTQI9Ut-Mjm2bvk3mMz80GFk3DfMtv5CfZv9ch4WQuY1ipvQosmElblWtiOPSPIhTJR0O9n-vdTJ057hK9t2yyjGEFCI9MVjfNrM4THbXoRhVSQ-GY"/>
+                    Google
+                </button>
+<button class="flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-slate-700 dark:text-slate-200 font-medium text-sm">
+<span class="material-symbols-outlined text-xl">ios</span>
+                    Apple
+                </button>
+</div>
+<div class="relative mb-8">
+<div class="absolute inset-0 flex items-center">
+<span class="w-full border-t border-slate-200 dark:border-slate-700"></span>
+</div>
+<div class="relative flex justify-center text-xs uppercase">
+<span class="bg-white dark:bg-background-dark px-2 text-slate-400 font-semibold tracking-wider">Or register with email</span>
+</div>
+</div>
+<form class="space-y-5" method="POST" action="{{ url_for('signup') }}">
+{% if error %}
+<div class="p-3 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm font-medium">{{ error }}</div>
+{% endif %}
+<!-- Full Name -->
+<div>
+<label class="block text-slate-700 dark:text-slate-300 text-sm font-semibold mb-2 ml-1">Full Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">person</span>
+<input name="name" class="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" placeholder="John Doe" type="text" required/>
+</div>
+</div>
+<!-- Email -->
+<div>
+<label class="block text-slate-700 dark:text-slate-300 text-sm font-semibold mb-2 ml-1">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
+<input name="email" class="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" placeholder="name@example.com" type="email" required/>
+</div>
+</div>
+<!-- Password Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-slate-700 dark:text-slate-300 text-sm font-semibold mb-2 ml-1">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
+<input name="password" class="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" placeholder="••••••••" type="password" required/>
+</div>
+</div>
+<div>
+<label class="block text-slate-700 dark:text-slate-300 text-sm font-semibold mb-2 ml-1">Confirm</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">verified_user</span>
+<input name="confirm_password" class="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" placeholder="••••••••" type="password" required/>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-3 py-2">
+<input class="mt-1 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" id="terms" type="checkbox"/>
+<label class="text-xs text-slate-500 dark:text-slate-400 leading-tight" for="terms">
+                        I agree to the <a class="text-primary font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>.
+                    </label>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full py-4 bg-primary text-white font-bold rounded-lg shadow-[0_10px_30px_-10px_rgba(145,75,226,0.5)] hover:shadow-[0_15px_35px_-10px_rgba(145,75,226,0.6)] hover:translate-y-[-1px] active:translate-y-[1px] transition-all text-lg" type="submit">
+                    Create Account
+                </button>
+</form>
+<div class="mt-8 text-center">
+<p class="text-slate-600 dark:text-slate-400 text-sm">
+                    Already have an account? 
+                    <a class="text-primary font-bold hover:underline ml-1" href="{{ url_for('signin') }}">Sign In</a>
+</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 text-center bg-transparent z-10">
+<p class="text-slate-400 text-xs font-medium uppercase tracking-widest">&copy; 2024 StudySnap AI — Smarter Learning Platform</p>
+</footer>
+</body></html>

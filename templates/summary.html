@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smart Summary | StudySnap AI</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-72 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-6 flex flex-col gap-8">
+<div class="flex items-center gap-3 px-2">
+<div class="size-10 rounded-lg bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight">StudySnap AI</h1>
+<p class="text-xs text-primary font-medium uppercase tracking-wider">Pro Plan</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto pr-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary active-glow transition-all" href="{{ url_for('summary') }}">
+<span class="material-symbols-outlined fill-icon">dashboard</span>
+<span class="text-sm font-semibold">Smart Summary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('mock') }}">
+<span class="material-symbols-outlined">quiz</span>
+<span class="text-sm font-medium">Mock Test</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('sample_paper') }}">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Sample Paper</span>
+</a>
+<div class="my-4 border-t border-primary/10 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('ai') }}">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-sm font-medium">Ask AI</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('pdf') }}">
+<span class="material-symbols-outlined">download</span>
+<span class="text-sm font-medium">Download PDF</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('history') }}">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm font-medium">History</span>
+</a>
+<a class="mt-auto flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('settings') }}">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</aside>
+
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-white dark:bg-background-dark p-8 custom-scrollbar">
+<div class="max-w-5xl mx-auto space-y-8">
+<!-- Header -->
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Smart Summary</h2>
+{% if data %}
+<p class="text-slate-500 dark:text-slate-400 mt-1">AI-generated insights from "{{ data.video_title | default('Your Video', true) }}"</p>
+{% else %}
+<p class="text-slate-500 dark:text-slate-400 mt-1">No summary generated yet. <a href="{{ url_for('home') }}" class="text-primary font-semibold hover:underline">Go generate one!</a></p>
+{% endif %}
+</div>
+<div class="flex items-center gap-3">
+<a href="{{ url_for('home') }}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+<span class="material-symbols-outlined text-lg">home</span>
+<span>Home</span>
+</a>
+<button id="open-ai-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">chat</span>
+<span>Ask AI</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+<span class="material-symbols-outlined text-lg">share</span>
+<span>Share Summary</span>
+</button>
+</div>
+</header>
+
+{% if data %}
+<!-- Tabs -->
+<nav class="flex items-center gap-6 border-b border-slate-200 dark:border-slate-800 pb-0 mb-6" id="summary-tabs">
+<a class="summary-tab flex items-center gap-2 px-3 py-3 text-sm font-semibold text-primary border-b-2 border-primary cursor-pointer transition-all" data-tab="important">
+<span class="material-symbols-outlined text-[20px]">star</span>
+<span>Important Points</span>
+</a>
+<a class="summary-tab flex items-center gap-2 px-3 py-3 text-sm font-medium text-slate-500 hover:text-primary cursor-pointer border-b-2 border-transparent transition-all" data-tab="priority">
+<span class="material-symbols-outlined text-[20px]">priority_high</span>
+<span>Priority Topics</span>
+</a>
+<a class="summary-tab flex items-center gap-2 px-3 py-3 text-sm font-medium text-slate-500 hover:text-primary cursor-pointer border-b-2 border-transparent transition-all" data-tab="hindi">
+<span class="material-symbols-outlined text-[20px]">translate</span>
+<span>Hindi Notes</span>
+</a>
+</nav>
+
+<!-- Detail Level Controls -->
+<section id="detail-level-controls" class="flex flex-wrap items-center justify-between gap-4">
+<div class="bg-primary/10 p-1.5 rounded-xl flex items-center gap-1">
+<button class="detail-btn px-5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400" data-level="short">
+📋 Short
+</button>
+<button class="detail-btn px-5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400" data-level="medium">
+📝 Medium
+</button>
+<button class="detail-btn px-5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400" data-level="detailed">
+📚 Detailed
+</button>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-sm">info</span>
+<span>Switch detail levels to see more or less content</span>
+</div>
+</section>
+
+<!-- Summary Content Card -->
+<div class="glass-card rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+<!-- Header Banner -->
+<div class="h-40 w-full bg-gradient-to-br from-primary/30 via-indigo-500/20 to-purple-600/30 relative">
+<div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+<div class="absolute bottom-6 left-8 right-8">
+<span class="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold uppercase tracking-widest text-white mb-2 inline-block">Study Pack</span>
+<h3 class="text-2xl font-bold text-white">{{ data.chapter_title | default('Generated Summary', true) }}</h3>
+</div>
+</div>
+
+<div class="p-8 space-y-6">
+<!-- Main Summary -->
+                <div class="detail-content prose prose-slate dark:prose-invert max-w-none summary-content" data-detail="short" style="display:none">
+<p class="text-lg leading-relaxed text-slate-700 dark:text-slate-300">{{ data.main_summary.short | default('') | safe }}</p>
+</div>
+                <div class="detail-content prose prose-slate dark:prose-invert max-w-none summary-content" data-detail="medium" style="display:none">
+<p class="text-lg leading-relaxed text-slate-700 dark:text-slate-300">{{ data.main_summary.medium | default('') | safe }}</p>
+</div>
+                <div class="detail-content prose prose-slate dark:prose-invert max-w-none summary-content" data-detail="detailed" style="display:none">
+<p class="text-lg leading-relaxed text-slate-700 dark:text-slate-300">{{ data.main_summary.detailed | default('') | safe }}</p>
+</div>
+
+<!-- Content Loading Overlay -->
+<div id="content-loading" class="hidden flex items-center justify-center py-16">
+<div class="flex flex-col items-center gap-4">
+<div class="relative size-12">
+<div class="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+<div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Loading content...</p>
+</div>
+</div>
+
+<!-- Tab Content: Important Points -->
+<div class="tab-panel" data-tab="important">
+<h4 class="text-xl font-bold mt-6 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">star</span> Important Points
+</h4>
+<div class="detail-content summary-content" data-detail="short" style="display:none">{{ data.important_points.short | default('') | safe }}</div>
+<div class="detail-content summary-content" data-detail="medium" style="display:none">{{ data.important_points.medium | default('') | safe }}</div>
+<div class="detail-content summary-content" data-detail="detailed" style="display:none">{{ data.important_points.detailed | default('') | safe }}</div>
+</div>
+
+<!-- Tab Content: Priority Topics -->
+<div class="tab-panel hidden" data-tab="priority">
+<h4 class="text-xl font-bold mt-6 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">priority_high</span> Priority Topics
+</h4>
+<div class="summary-content">{{ data.priority_topics_all | default('') | safe }}</div>
+</div>
+
+<!-- Tab Content: Hindi Notes -->
+<div class="tab-panel hidden" data-tab="hindi">
+<h4 class="text-xl font-bold mt-6 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">translate</span> हिंदी नोट्स
+</h4>
+<div class="detail-content summary-content" data-detail="short" style="display:none">{{ data.hindi_notes.short | default('') | safe }}</div>
+<div class="detail-content summary-content" data-detail="medium" style="display:none">{{ data.hindi_notes.medium | default('') | safe }}</div>
+<div class="detail-content summary-content" data-detail="detailed" style="display:none">{{ data.hindi_notes.detailed | default('') | safe }}</div>
+</div>
+
+<!-- Core Observations -->
+{% if data.core_observations %}
+<div class="border-t border-slate-100 dark:border-slate-800 pt-6 mt-8">
+<h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span> Core Observations
+</h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+{% for obs in data.core_observations %}
+<div class="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-primary/5 dark:from-slate-800/50 dark:to-primary/10 border border-slate-100 dark:border-slate-700">
+<h5 class="font-bold text-primary mb-2 flex items-center gap-2"><span class="text-lg">🔍</span> {{ obs.title }}</h5>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{{ obs.description }}</p>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+
+<!-- Conclusion -->
+{% if data.conclusion %}
+<div class="border-t border-slate-100 dark:border-slate-800 pt-6 mt-6">
+<h4 class="text-lg font-bold mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">check_circle</span> Conclusion
+</h4>
+<p class="text-base leading-relaxed text-slate-700 dark:text-slate-300">{{ data.conclusion | safe }}</p>
+</div>
+{% endif %}
+
+<!-- Key Terms -->
+{% if data.key_terms %}
+<div class="pt-6 border-t border-primary/10 flex flex-wrap items-center gap-2">
+<span class="text-xs font-bold text-slate-400 uppercase mr-2">🔑 Key Terms:</span>
+{% for term in data.key_terms %}
+<span class="px-3 py-1.5 rounded-full bg-primary/10 dark:bg-primary/20 text-xs font-semibold text-primary border border-primary/20">{{ term }}</span>
+{% endfor %}
+</div>
+{% endif %}
+</div>
+</div>
+
+<!-- Highlights Section -->
+{% if data.highlights %}
+<section>
+<h4 class="text-xl font-bold mb-4 px-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">auto_awesome</span> Quick Highlights
+</h4>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+{% for h in data.highlights %}
+<div class="p-5 rounded-2xl glass-card flex gap-4 items-start hover:shadow-lg transition-shadow">
+<div class="size-10 rounded-xl flex items-center justify-center flex-shrink-0
+{% if h.type == 'insight' %} bg-blue-500/20 text-blue-500{% elif h.type == 'mastery' %} bg-green-500/20 text-green-500{% else %} bg-orange-500/20 text-orange-500{% endif %}">
+<span class="material-symbols-outlined">{% if h.type == 'insight' %}lightbulb{% elif h.type == 'mastery' %}check_circle{% else %}warning{% endif %}</span>
+</div>
+<div>
+<h5 class="font-bold mb-1 text-sm">{{ h.title }}</h5>
+<p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{{ h.description }}</p>
+</div>
+</div>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="flex flex-col items-center justify-center py-24 text-center">
+<div class="size-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-5xl text-primary/50">description</span>
+</div>
+<h3 class="text-xl font-bold text-slate-400 dark:text-slate-500 mb-2">No Summary Yet</h3>
+<p class="text-slate-400 dark:text-slate-500 mb-6 max-w-md">Paste a YouTube video link on the home page and generate your AI study pack to see your smart summary here.</p>
+<a href="{{ url_for('home') }}" class="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg align-middle mr-1">home</span> Go to Home
+</a>
+</div>
+{% endif %}
+</div>
+</main>
+
+<!-- Ask AI Split Screen Chat -->
+<div id="ai-chat-split" class="hidden w-0 flex-shrink-0 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col transition-all duration-300 ease-in-out overflow-hidden">
+<!-- Header -->
+<header class="h-16 flex items-center justify-between px-6 border-b border-primary/10 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex-shrink-0">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary text-xl">psychology</span>
+</div>
+<div>
+<h2 class="text-slate-800 dark:text-slate-100 font-semibold text-sm">Ask AI</h2>
+<div class="flex items-center gap-1.5">
+<span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
+<span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Online</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button id="clear-chat-btn" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors" title="New Chat">
+<span class="material-symbols-outlined text-lg">add_comment</span>
+</button>
+<button id="close-ai-btn" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+</header>
+<!-- Chat Messages -->
+<div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+<!-- Welcome message -->
+<div class="flex gap-3">
+<div class="shrink-0 size-8 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white text-base">smart_toy</span>
+</div>
+<div class="flex flex-col gap-1 items-start max-w-[85%]">
+<div class="p-4 rounded-2xl rounded-tl-none bg-primary/10 border border-primary/20 text-slate-700 dark:text-slate-300 text-sm leading-relaxed summary-content">
+👋 Hello! I'm your StudySnap AI assistant.
+{% if data %}
+I've analyzed <strong class="text-primary">{{ data.video_title | default('your video', true) }}</strong>. Ask me anything about the content — I can explain concepts, create quizzes, or simplify topics!
+{% else %}
+Generate a summary first and I'll be able to answer questions about your study material!
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="p-4 border-t border-slate-200 dark:border-slate-800 flex-shrink-0">
+<div class="relative flex items-center gap-2">
+<input id="chat-input" class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none placeholder:text-slate-400 dark:text-slate-100" placeholder="Ask anything about your study material..." type="text" autocomplete="off"/>
+<button id="chat-send-btn" class="bg-primary hover:bg-primary/90 text-white p-3 rounded-xl shadow-lg shadow-primary/30 transition-all flex items-center justify-center active:scale-95">
+<span class="material-symbols-outlined text-lg">send</span>
+</button>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // ── Ask AI split screen ─────────────────────────────
+    const openBtn = document.getElementById('open-ai-btn');
+    const closeBtn = document.getElementById('close-ai-btn');
+    const clearBtn = document.getElementById('clear-chat-btn');
+    const chatSplit = document.getElementById('ai-chat-split');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatSendBtn = document.getElementById('chat-send-btn');
+
+    let conversationHistory = [];
+    const welcomeHTML = chatMessages ? chatMessages.innerHTML : '';
+
+    if (openBtn && chatSplit) {
+        openBtn.addEventListener('click', () => {
+            chatSplit.classList.remove('hidden');
+            requestAnimationFrame(() => { chatSplit.style.width = '420px'; });
+            openBtn.classList.add('opacity-50', 'pointer-events-none');
+            setTimeout(() => chatInput && chatInput.focus(), 350);
+        });
+    }
+    if (closeBtn && chatSplit) {
+        closeBtn.addEventListener('click', () => {
+            chatSplit.style.width = '0';
+            setTimeout(() => {
+                chatSplit.classList.add('hidden');
+                if (openBtn) openBtn.classList.remove('opacity-50', 'pointer-events-none');
+            }, 300);
+        });
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            conversationHistory = [];
+            if (chatMessages) chatMessages.innerHTML = welcomeHTML;
+        });
+    }
+
+    // ── Chat functionality ─────────────────────────────
+    function addMessage(role, html) {
+        if (!chatMessages) return;
+        const wrapper = document.createElement('div');
+        if (role === 'user') {
+            wrapper.className = 'flex gap-3 justify-end';
+            wrapper.innerHTML = `
+                <div class="flex flex-col gap-1 items-end max-w-[85%]">
+                    <div class="p-4 rounded-2xl rounded-tr-none bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm leading-relaxed">${escapeHtml(html)}</div>
+                </div>
+                <div class="shrink-0 size-8 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-base">person</span>
+                </div>`;
+        } else {
+            wrapper.className = 'flex gap-3';
+            wrapper.innerHTML = `
+                <div class="shrink-0 size-8 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-white text-base">smart_toy</span>
+                </div>
+                <div class="flex flex-col gap-1 items-start max-w-[85%]">
+                    <div class="p-4 rounded-2xl rounded-tl-none bg-primary/10 border border-primary/20 text-slate-700 dark:text-slate-300 text-sm leading-relaxed summary-content">${html}</div>
+                </div>`;
+        }
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addTypingIndicator() {
+        const el = document.createElement('div');
+        el.id = 'typing-indicator';
+        el.className = 'flex gap-3';
+        el.innerHTML = `
+            <div class="shrink-0 size-8 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined text-white text-base">smart_toy</span>
+            </div>
+            <div class="p-4 rounded-2xl rounded-tl-none bg-primary/10 border border-primary/20">
+                <div class="flex gap-1.5 items-center">
+                    <div class="size-2 bg-primary/60 rounded-full animate-bounce" style="animation-delay:0ms"></div>
+                    <div class="size-2 bg-primary/60 rounded-full animate-bounce" style="animation-delay:150ms"></div>
+                    <div class="size-2 bg-primary/60 rounded-full animate-bounce" style="animation-delay:300ms"></div>
+                </div>
+            </div>`;
+        chatMessages.appendChild(el);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const el = document.getElementById('typing-indicator');
+        if (el) el.remove();
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function sendMessage() {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+        chatInput.value = '';
+        chatSendBtn.disabled = true;
+
+        addMessage('user', msg);
+        addTypingIndicator();
+
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, history: conversationHistory })
+            });
+            const data = await res.json();
+            removeTypingIndicator();
+            if (data.reply) {
+                conversationHistory.push({ role: 'user', content: msg });
+                conversationHistory.push({ role: 'assistant', content: data.reply });
+                addMessage('ai', data.reply);
+            } else {
+                addMessage('ai', '⚠️ ' + (data.error || 'Something went wrong. Please try again.'));
+            }
+        } catch (err) {
+            removeTypingIndicator();
+            addMessage('ai', '⚠️ Network error. Please check your connection.');
+        }
+        chatSendBtn.disabled = false;
+        chatInput.focus();
+    }
+
+    if (chatSendBtn) chatSendBtn.addEventListener('click', sendMessage);
+    if (chatInput) chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    // ── Tab switching ────────────────────────────────────
+    const tabs = document.querySelectorAll('.summary-tab');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    const contentLoading = document.getElementById('content-loading');
+    const detailLevelControls = document.getElementById('detail-level-controls');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = tab.dataset.tab;
+            tabs.forEach(t => {
+                t.classList.remove('text-primary', 'border-primary', 'font-semibold');
+                t.classList.add('text-slate-500', 'font-medium', 'border-transparent');
+            });
+            tab.classList.remove('text-slate-500', 'font-medium', 'border-transparent');
+            tab.classList.add('text-primary', 'border-primary', 'font-semibold');
+
+            // Hide detail level buttons when Priority Topics tab is active
+            if (detailLevelControls) {
+                detailLevelControls.style.display = target === 'priority' ? 'none' : '';
+            }
+
+            // Show loading, hide all panels
+            tabPanels.forEach(panel => panel.classList.add('hidden'));
+            if (contentLoading) contentLoading.classList.remove('hidden');
+
+            setTimeout(() => {
+                if (contentLoading) contentLoading.classList.add('hidden');
+                tabPanels.forEach(panel => {
+                    panel.classList.toggle('hidden', panel.dataset.tab !== target);
+                });
+                // Re-apply current detail level for non-priority tabs
+                if (target !== 'priority') {
+                    detailContents.forEach(el => {
+                        el.style.display = (el.dataset.detail === currentLevel) ? '' : 'none';
+                        el.classList.toggle('active', el.dataset.detail === currentLevel);
+                    });
+                }
+            }, 400);
+        });
+    });
+
+    // ── Detail level switching ───────────────────────────
+    const detailBtns = document.querySelectorAll('.detail-btn');
+    const detailContents = document.querySelectorAll('.detail-content');
+    let currentLevel = 'medium';
+    let isInitialLoad = true;
+
+    function setDetailLevel(level) {
+        currentLevel = level;
+        detailBtns.forEach(btn => {
+            if (btn.dataset.level === level) {
+                btn.classList.add('bg-white', 'dark:bg-slate-800', 'text-primary', 'shadow-sm');
+                btn.classList.remove('text-slate-500', 'dark:text-slate-400');
+            } else {
+                btn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-primary', 'shadow-sm');
+                btn.classList.add('text-slate-500', 'dark:text-slate-400');
+            }
+        });
+
+        if (isInitialLoad) {
+            detailContents.forEach(el => {
+                if (el.dataset.detail === level) {
+                    el.style.display = '';
+                    el.classList.add('active');
+                } else {
+                    el.style.display = 'none';
+                    el.classList.remove('active');
+                }
+            });
+            isInitialLoad = false;
+            return;
+        }
+
+        // Show loading, hide all content
+        detailContents.forEach(el => { el.style.display = 'none'; el.classList.remove('active'); });
+        if (contentLoading) contentLoading.classList.remove('hidden');
+
+        setTimeout(() => {
+            if (contentLoading) contentLoading.classList.add('hidden');
+            detailContents.forEach(el => {
+                if (el.dataset.detail === level) {
+                    el.style.display = '';
+                    el.classList.add('active');
+                } else {
+                    el.style.display = 'none';
+                    el.classList.remove('active');
+                }
+            });
+        }, 400);
+    }
+
+    detailBtns.forEach(btn => {
+        btn.addEventListener('click', () => setDetailLevel(btn.dataset.level));
+    });
+
+    // Always start at medium
+    setDetailLevel('medium');
+});
+</script>
+</body></html>

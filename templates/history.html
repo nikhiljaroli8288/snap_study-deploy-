@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>History | StudySnap AI</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-6 flex flex-col gap-8">
+<div class="flex items-center gap-3 px-2">
+<div class="size-10 rounded-lg bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight">StudySnap AI</h1>
+<p class="text-xs text-primary font-medium uppercase tracking-wider">Pro Plan</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto pr-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('summary') }}">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Smart Summary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('mock') }}">
+<span class="material-symbols-outlined">quiz</span>
+<span class="text-sm font-medium">Mock Test</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('sample_paper') }}">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Sample Paper</span>
+</a>
+<div class="my-4 border-t border-primary/10 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('ai') }}">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-sm font-medium">Ask AI</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('pdf') }}">
+<span class="material-symbols-outlined">download</span>
+<span class="text-sm font-medium">Download PDF</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary active-glow transition-all" href="{{ url_for('history') }}">
+<span class="material-symbols-outlined fill-icon">history</span>
+<span class="text-sm font-semibold">History</span>
+</a>
+<a class="mt-auto flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('settings') }}">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto custom-scrollbar">
+<!-- Header -->
+<header class="sticky top-0 z-10 h-16 flex items-center justify-between px-8 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">history</span>
+</div>
+<div>
+<h2 class="font-bold text-lg">History</h2>
+<p class="text-xs text-slate-500">Your study sessions from the last 7 days</p>
+</div>
+</div>
+</header>
+
+<!-- Content -->
+<div class="p-8 max-w-4xl mx-auto">
+{% if entries %}
+<div class="space-y-4">
+{% for entry in entries %}
+<div class="glass-card rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-200 dark:border-slate-800 hover:border-primary/30 transition-all">
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base text-slate-900 dark:text-slate-100 truncate">{{ entry.video_title }}</h3>
+<a href="{{ entry.video_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline truncate block mt-1">{{ entry.video_url }}</a>
+<p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span>
+{{ entry.created_at.strftime('%b %d, %Y &middot; %I:%M %p') }}
+</p>
+</div>
+<a href="{{ url_for('history_view', data_key=entry.data_key) }}" class="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">visibility</span>
+<span>View</span>
+</a>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="flex flex-col items-center justify-center py-24 text-center">
+<div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-primary">history</span>
+</div>
+<h3 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-2">No History Yet</h3>
+<p class="text-slate-500 dark:text-slate-400 max-w-md">Your study history from the last 7 days will appear here. Go generate a summary to get started!</p>
+<a href="{{ url_for('home') }}" class="mt-6 flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+<span>Generate Summary</span>
+</a>
+</div>
+{% endif %}
+</div>
+</main>
+</div>
+</body></html>

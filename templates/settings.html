@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head><meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StudySnap AI - Settings</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-6 flex flex-col gap-8 sticky top-0 h-screen">
+<div class="flex items-center gap-3 px-2">
+<div class="size-10 rounded-lg bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight">StudySnap AI</h1>
+<p class="text-xs text-primary font-medium uppercase tracking-wider">Pro Plan</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto pr-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('summary') }}">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Smart Summary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('mock') }}">
+<span class="material-symbols-outlined">quiz</span>
+<span class="text-sm font-medium">Mock Test</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('sample_paper') }}">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Sample Paper</span>
+</a>
+<div class="my-4 border-t border-primary/10 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('ai') }}">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-sm font-medium">Ask AI</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('pdf') }}">
+<span class="material-symbols-outlined">download</span>
+<span class="text-sm font-medium">Download PDF</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('history') }}">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm font-medium">History</span>
+</a>
+<a class="mt-auto flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary active-glow transition-all" href="{{ url_for('settings') }}">
+<span class="material-symbols-outlined fill-icon">settings</span>
+<span class="text-sm font-semibold">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark p-8">
+<div class="max-w-4xl mx-auto">
+<header class="mb-10">
+<h2 class="text-3xl font-bold tracking-tight">Account Settings</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-2">Manage your preferences and personalized AI study environment.</p>
+</header>
+<div class="space-y-8">
+<!-- danger zone -->
+<!-- Appearance Section -->
+<section>
+<h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">palette</span>
+                            Appearance
+                        </h3>
+<div class="glass-card rounded-xl p-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+<div>
+<p class="font-bold">Theme</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">Switch between light and dark mode</p>
+</div>
+<button id="settings-theme-toggle" class="flex items-center gap-3 px-5 py-3 rounded-xl border border-primary/20 bg-white dark:bg-slate-800 hover:border-primary transition-all w-full md:w-auto">
+<span id="settings-toggle-icon" class="material-symbols-outlined text-primary">dark_mode</span>
+<span id="settings-toggle-label" class="text-sm font-semibold flex-1 text-left">Dark Mode</span>
+<span class="material-symbols-outlined text-slate-400 text-sm">swap_horiz</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Learning Preferences Section -->
+<section>
+<h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">psychology</span>
+                            Study Preferences
+                        </h3>
+<div class="glass-card rounded-xl p-6 space-y-6">
+<!-- Language -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+<div>
+<p class="font-bold">Default Language</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">Preferred AI response language</p>
+</div>
+<div class="relative">
+<select class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2.5 appearance-none focus:ring-2 focus:ring-primary outline-none text-slate-700 dark:text-slate-200">
+<option value="en">English (Global)</option>
+<option value="hi">Hindi (हिन्दी)</option>
+<option value="hing">Hinglish</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">expand_more</span>
+</div>
+</div>
+<hr class="border-primary/10"/>
+<!-- Exam Mode -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+<div>
+<p class="font-bold">Exam Mode</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">Tailors content to your academic level</p>
+</div>
+<div class="relative">
+<select class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2.5 appearance-none focus:ring-2 focus:ring-primary outline-none text-slate-700 dark:text-slate-200">
+<option value="school">School (K-12)</option>
+<option value="college">College / University</option>
+<option selected="" value="competitive">Competitive Exams (JEE/NEET/UPSC)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">expand_more</span>
+</div>
+</div>
+<hr class="border-primary/10"/>
+<!-- Difficulty -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+<div>
+<p class="font-bold">Explanation Difficulty</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">Depth of AI tutor explanations</p>
+</div>
+<div class="relative">
+<select class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2.5 appearance-none focus:ring-2 focus:ring-primary outline-none text-slate-700 dark:text-slate-200">
+<option value="easy">Beginner (Foundational)</option>
+<option selected="" value="medium">Intermediate (Standard)</option>
+<option value="hard">Advanced (Expert Level)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">expand_more</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Danger Zone -->
+<section>
+<h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-red-500">warning</span>
+                            Account Management
+                        </h3>
+<div class="glass-card rounded-xl p-6 border-red-100">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div>
+<p class="font-bold text-red-500">Sign Out</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">Log out of your current session on this device</p>
+</div>
+<a href="{{ url_for('logout') }}" class="px-6 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+                                    Log Out
+                                </a>
+</div>
+</div>
+</section>
+</div>
+<footer class="mt-12 py-8 border-t border-primary/10 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+<p>© 2024 StudySnap AI. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</footer>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analyzing... | StudySnap AI</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden sparkle-bg">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-primary/10 px-6 md:px-10 py-4 backdrop-blur-md sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-2xl">neurology</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100">StudySnap AI</h2>
+</div>
+<div class="flex items-center gap-4">
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+<!-- Background Ambient Glow -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="max-w-[560px] w-full flex flex-col items-center">
+<!-- AI Brain Icon Visualizer -->
+<div class="relative mb-12">
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-2xl scale-110"></div>
+<div class="relative w-32 h-32 md:w-40 md:h-40 glass-panel rounded-full flex items-center justify-center border-2 border-primary/30 glow-effect">
+<span class="material-symbols-outlined text-6xl md:text-7xl text-primary leading-none">psychology</span>
+<!-- Orbiting dots -->
+<div class="absolute inset-0 border border-primary/10 rounded-full animate-spin [animation-duration:8s]">
+<div class="absolute -top-1 left-1/2 -translate-x-1/2 size-2 bg-primary rounded-full shadow-[0_0_10px_#914be2]"></div>
+</div>
+<div class="absolute inset-4 border border-primary/5 rounded-full animate-spin [animation-duration:12s] [animation-direction:reverse]">
+<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 size-1.5 bg-primary/60 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Status Display -->
+<div class="text-center space-y-2 mb-10">
+<h2 class="tracking-tight text-3xl md:text-4xl font-bold leading-tight text-slate-900 dark:text-slate-100">Analyzing Video...</h2>
+<div class="flex flex-col gap-1">
+<p class="text-slate-400 dark:text-slate-500 text-base md:text-lg font-normal leading-normal">Extracting Key Concepts &amp; Generating Smart Notes</p>
+<div class="flex items-center justify-center gap-2 mt-2">
+<span class="text-xs font-semibold text-primary px-2 py-0.5 rounded bg-primary/10">OCR ENABLED</span>
+<span class="text-xs font-semibold text-primary px-2 py-0.5 rounded bg-primary/10">TRANSCRIPTION ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- Progress Container -->
+<div class="w-full glass-panel rounded-2xl p-6 md:p-8 space-y-6 glow-effect">
+<div class="flex flex-col gap-4">
+<div class="flex items-end justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-slate-400 text-xs font-bold uppercase tracking-widest">Current Task</span>
+<p id="current-task" class="text-base font-semibold">Initializing AI Engine...</p>
+</div>
+<div class="text-right">
+<p id="progress-percent" class="text-primary text-2xl font-bold tabular-nums">5%</p>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="relative w-full h-3 bg-primary/10 rounded-full overflow-hidden">
+<div id="progress-bar" class="absolute top-0 left-0 h-full bg-primary rounded-full shadow-[0_0_15px_rgba(145,75,226,0.5)] transition-all duration-1000" style="width: 5%;">
+<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+</div>
+</div>
+<div class="flex items-center justify-between text-xs font-medium">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-sm animate-spin">refresh</span>
+<span id="progress-detail">Starting up AI engine...</span>
+</div>
+<p class="text-slate-500">Estimated time: 20s</p>
+</div>
+</div>
+<!-- Step Indicator -->
+<div class="grid grid-cols-3 gap-2 pt-2 border-t border-primary/10">
+<div class="flex flex-col gap-2">
+<div class="h-1 step-bar bg-primary/20 rounded-full transition-all duration-500"></div>
+<span class="text-[10px] step-label uppercase font-bold text-slate-500">Transcript</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="h-1 step-bar bg-primary/20 rounded-full transition-all duration-500"></div>
+<span class="text-[10px] step-label uppercase font-bold text-slate-500">AI Analysis</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="h-1 step-bar bg-primary/20 rounded-full transition-all duration-500"></div>
+<span class="text-[10px] step-label uppercase font-bold text-slate-500">Finalizing</span>
+</div>
+</div>
+</div>
+<!-- Footer Info -->
+<div class="mt-12 flex flex-col items-center gap-6 opacity-60">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">verified</span>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300">Gemini AI</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">speed</span>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300">High Speed Inference</span>
+</div>
+</div>
+<p class="text-[10px] text-center max-w-xs leading-relaxed uppercase tracking-widest text-slate-600 dark:text-slate-400">
+                            Our AI is processing your video. Please keep this tab open for the best generation results.
+                        </p>
+</div>
+</div>
+</main>
+<!-- Bottom decorative bar -->
+<footer class="p-6 flex justify-center border-t border-primary/5">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-1.5">
+<div class="size-1.5 rounded-full bg-primary/40"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">Privacy Secured</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="size-1.5 rounded-full bg-primary/40"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">Encrypted Upload</span>
+</div>
+</div>
+</footer>
+</div>
+</div>
+<!-- Hidden Placeholder Image References as required -->
+<div class="hidden">
+<img data-alt="Abstract deep purple digital neural network pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHOxknMMpA0Y_vkfkrzQrCT5up8hClZ1eom0huHCThyrk0dqkigHr6ecLAwt-IRV-MEh-pSp1-fs6c0HObgtblEDyOMJGkqyG_S5RTsLOudlxHe5Dn4UWOSvz62uzS6dhjJUWjKV1hj6s8iV825iLuLoPK7uczCsOUf7thvBX_ZjRSClqOL3OQ_o3EIFTfxb9NgY3tuN9deqRg4nwx2vFEjITkJwoGHFjCmqccHpMlozvEEi-4WB4WaE99QrTHToVTWQB6eW1mCcI"/>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const progressBar = document.getElementById('progress-bar');
+    const progressPercent = document.getElementById('progress-percent');
+    const currentTask = document.getElementById('current-task');
+    const progressDetail = document.getElementById('progress-detail');
+    const stepBars = document.querySelectorAll('.step-bar');
+    const stepLabels = document.querySelectorAll('.step-label');
+
+    // Read stored form data
+    const url = localStorage.getItem('studysnap_url') || '';
+    const uploadMode = localStorage.getItem('studysnap_upload_mode') || '';
+    const fileKey = localStorage.getItem('studysnap_file_key') || '';
+    const exam_mode = localStorage.getItem('studysnap_exam_mode') || 'College/University';
+    const language = localStorage.getItem('studysnap_language') || 'English (Pure)';
+    const difficulty = localStorage.getItem('studysnap_difficulty') || 'Medium (Standard)';
+    const study_depth = localStorage.getItem('studysnap_study_depth') || '40';
+
+    if (!url && !uploadMode) {
+        alert('No video URL or file found. Please go back and provide input.');
+        window.location.href = '/';
+        return;
+    }
+
+    // Update title for file upload mode
+    if (uploadMode && fileKey) {
+        const titleEl = document.querySelector('h2.tracking-tight');
+        if (titleEl) titleEl.textContent = 'Analyzing Document...';
+    }
+
+    // Animated progress simulation
+    const stages = [
+        { percent: 25, task: 'Extracting Video Transcript', detail: 'Downloading captions & subtitles...' },
+        { percent: 50, task: 'Parsing Content Structure', detail: 'Identifying key concepts & topics...' },
+        { percent: 75, task: 'AI Analysis & Generation', detail: 'Generating study material with Gemini AI...' },
+        { percent: 90, task: 'Finalizing Study Pack', detail: 'Formatting summaries & notes...' },
+    ];
+
+    let stageIndex = 0;
+    const stageInterval = setInterval(() => {
+        if (stageIndex < stages.length) {
+            const s = stages[stageIndex];
+            if (progressBar) progressBar.style.width = s.percent + '%';
+            if (progressPercent) progressPercent.textContent = s.percent + '%';
+            if (currentTask) currentTask.textContent = s.task;
+            if (progressDetail) progressDetail.textContent = s.detail;
+            // Update step indicators
+            if (stageIndex >= 1 && stepBars[0]) { stepBars[0].classList.add('bg-primary'); stepBars[0].classList.remove('bg-primary/20'); }
+            if (stageIndex >= 2 && stepBars[1]) { stepBars[1].classList.add('bg-primary'); stepBars[1].classList.remove('bg-primary/20'); }
+            if (stageIndex >= 3 && stepBars[2]) { stepBars[2].classList.add('bg-primary'); stepBars[2].classList.remove('bg-primary/20'); }
+            stageIndex++;
+        }
+    }, 2000);
+
+    // Determine which API to call
+    const isFileMode = uploadMode && fileKey;
+    const apiUrl = isFileMode ? '/api/generate-from-file' : '/api/generate';
+    const apiBody = isFileMode
+        ? JSON.stringify({ file_key: fileKey, exam_mode, language, difficulty, study_depth })
+        : JSON.stringify({ url, exam_mode, language, difficulty, study_depth });
+
+    // Call the API
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: apiBody,
+        signal: AbortSignal.timeout(360000)
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().catch(() => ({ error: 'Server error (HTTP ' + res.status + '). Please try again.' }));
+        }
+        return res.json();
+    })
+    .then(data => {
+        clearInterval(stageInterval);
+        if (data.success) {
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressPercent) progressPercent.textContent = '100%';
+            if (currentTask) currentTask.textContent = 'Complete!';
+            if (progressDetail) progressDetail.textContent = 'Redirecting to your study pack...';
+            stepBars.forEach(b => { b.classList.add('bg-primary'); b.classList.remove('bg-primary/20'); });
+            // Clear stale mock/sample-paper results from previous video
+            localStorage.removeItem('studysnap_mock');
+            localStorage.removeItem('studysnap_paper');
+            localStorage.removeItem('studysnap_upload_mode');
+            localStorage.removeItem('studysnap_file_key');
+            setTimeout(() => { window.location.href = '/summary'; }, 800);
+        } else {
+            alert('Error: ' + (data.error || 'Something went wrong. Please try again.'));
+            window.location.href = '/';
+        }
+    })
+    .catch(err => {
+        clearInterval(stageInterval);
+        const msg = err.name === 'TimeoutError' || err.message.includes('timed out')
+            ? 'Generation is taking too long. The AI may be busy — please wait a moment and try again.'
+            : 'Failed to generate study pack. Please check your connection and try again.\n\n' + err.message;
+        alert(msg);
+        window.location.href = '/';
+    });
+});
+</script>
+</body></html>

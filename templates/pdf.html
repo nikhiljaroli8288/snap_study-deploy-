@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Download Study Pack - StudySnap AI</title>
+<script src="https://cdn.tailwindcss.com/3.4.1?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: { "primary":"#488fe5","primary-dark":"#3a72b7","primary-gradient":"#7c4ee5","accent":"#914be2","background-light":"#f8fafc","background-dark":"#0f172a","background-alt":"#ffffff","primary-purple":"#914be2" },
+    fontFamily: { "display": ["Inter","sans-serif"] },
+    borderRadius: { "DEFAULT":"0.75rem","lg":"1rem","xl":"1.5rem","full":"9999px" }
+  }}
+};
+(function(){var s=localStorage.getItem("theme"),d=window.matchMedia("(prefers-color-scheme:dark)").matches;
+if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-72 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-6 flex flex-col gap-8">
+<div class="flex items-center gap-3 px-2">
+<div class="size-10 rounded-lg bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight">StudySnap AI</h1>
+<p class="text-xs text-primary font-medium uppercase tracking-wider">Pro Plan</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto pr-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('summary') }}">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Smart Summary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('mock') }}">
+<span class="material-symbols-outlined">quiz</span>
+<span class="text-sm font-medium">Mock Test</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('sample_paper') }}">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Sample Paper</span>
+</a>
+<div class="my-4 border-t border-primary/10 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('ai') }}">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-sm font-medium">Ask AI</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary active-glow transition-all" href="{{ url_for('pdf') }}">
+<span class="material-symbols-outlined fill-icon">download</span>
+<span class="text-sm font-semibold">Download PDF</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('history') }}">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm font-medium">History</span>
+</a>
+<a class="mt-auto flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="{{ url_for('settings') }}">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto custom-scrollbar">
+<!-- Header -->
+<header class="sticky top-0 z-10 h-16 flex items-center justify-between px-8 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+</div>
+<div>
+<h2 class="font-bold text-lg">Download Study Pack</h2>
+<p class="text-xs text-slate-500">Complete PDF with notes, papers &amp; key points</p>
+</div>
+</div>
+<button id="download-btn" class="hidden px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+<span class="material-symbols-outlined text-sm">download</span> Download PDF
+</button>
+</header>
+
+<div class="max-w-4xl mx-auto px-6 py-8">
+<!-- Generate State -->
+<div id="generate-state" class="flex flex-col items-center justify-center py-20 text-center">
+<div class="size-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-5xl text-primary/50">picture_as_pdf</span>
+</div>
+<h3 class="text-2xl font-bold mb-2">Generate Your Complete Study Pack</h3>
+<p class="text-slate-500 dark:text-slate-400 mb-4 max-w-lg">AI will create a comprehensive PDF containing:</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mb-8 text-left">
+<div class="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5">menu_book</span>
+<div>
+<p class="font-semibold text-sm">Detailed Notes</p>
+<p class="text-xs text-slate-500">Complete topic-wise study material</p>
+</div>
+</div>
+<div class="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5">help</span>
+<div>
+<p class="font-semibold text-sm">FAQ Topics</p>
+<p class="text-xs text-slate-500">Solutions &amp; examples for common questions</p>
+</div>
+</div>
+<div class="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5">description</span>
+<div>
+<p class="font-semibold text-sm">5 Sample Papers</p>
+<p class="text-xs text-slate-500">5 MCQs + 5 Fill-ups + 5 Short + 5 Long each</p>
+</div>
+</div>
+<div class="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5">lightbulb</span>
+<div>
+<p class="font-semibold text-sm">Points to Remember</p>
+<p class="text-xs text-slate-500">Key formulas, facts &amp; mnemonics</p>
+</div>
+</div>
+</div>
+{% if has_summary %}
+<button id="generate-btn" class="px-8 py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined">auto_awesome</span>
+Generate Complete Study Pack
+</button>
+{% else %}
+<div class="p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 max-w-md">
+<p class="text-amber-700 dark:text-amber-300 font-medium">No summary available yet.</p>
+<p class="text-amber-600 dark:text-amber-400 text-sm mt-1">Please <a href="{{ url_for('home') }}" class="text-primary font-semibold hover:underline">generate a summary</a> first, then come back to download your study pack.</p>
+</div>
+{% endif %}
+</div>
+
+<!-- Loading State -->
+<div id="loading-state" class="hidden flex flex-col items-center justify-center py-20">
+<div class="relative size-20 mb-6">
+<div class="absolute inset-0 rounded-full border-4 border-primary/20"></div>
+<div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl">picture_as_pdf</span>
+</div>
+</div>
+<h3 class="text-xl font-bold mb-2">Creating Your Study Pack...</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm">AI is generating detailed notes, 5 sample papers &amp; key points</p>
+<p class="text-slate-400 dark:text-slate-500 text-xs mt-2">This may take up to a minute</p>
+<div class="mt-4 w-64 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full animate-pulse" style="width:70%"></div>
+</div>
+</div>
+
+<!-- Error State -->
+<div id="error-state" class="hidden flex flex-col items-center justify-center py-20 text-center">
+<div class="size-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-red-500">error</span>
+</div>
+<h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Generation Failed</h3>
+<p id="error-message" class="text-slate-500 dark:text-slate-400 mb-6 max-w-md"></p>
+<button id="retry-btn" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all">Try Again</button>
+</div>
+
+<!-- Preview State (after generation) -->
+<div id="preview-state" class="hidden space-y-6">
+<div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-5 flex items-center gap-4">
+<div class="size-12 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
+</div>
+<div>
+<h3 class="font-bold text-green-700 dark:text-green-300">Study Pack Generated Successfully!</h3>
+<p class="text-sm text-green-600 dark:text-green-400">Your comprehensive PDF is ready to download. Click the Download button above.</p>
+</div>
+</div>
+
+<!-- Pack Contents Preview -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">list</span> Pack Contents
+</h3>
+<div id="contents-list" class="space-y-3"></div>
+</div>
+
+<div class="text-center pt-2">
+<button id="regenerate-btn" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all flex items-center gap-2 mx-auto">
+<span class="material-symbols-outlined">refresh</span> Regenerate Study Pack
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let packData = null;
+
+    const generateState = document.getElementById('generate-state');
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const previewState = document.getElementById('preview-state');
+    const downloadBtn = document.getElementById('download-btn');
+    const generateBtn = document.getElementById('generate-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const regenerateBtn = document.getElementById('regenerate-btn');
+
+    function showState(state) {
+        [generateState, loadingState, errorState, previewState].forEach(el => {
+            if (el) el.classList.add('hidden');
+        });
+        if (state) state.classList.remove('hidden');
+    }
+
+    function escapeHtml(text) {
+        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function handlePackResult(data) {
+        if (data) {
+            packData = data;
+            renderPreview();
+            showState(previewState);
+            if (downloadBtn) downloadBtn.classList.remove('hidden');
+        } else {
+            document.getElementById('error-message').textContent = 'Failed to generate study pack. Please try again.';
+            showState(errorState);
+        }
+    }
+
+    let _packPollTimer = null;
+    function pollPackJob(jobId) {
+        if (_packPollTimer) clearInterval(_packPollTimer);
+        _packPollTimer = setInterval(async () => {
+            try {
+                const res = await fetch('/api/job/' + jobId);
+                const job = await res.json();
+                if (job.status === 'done') {
+                    clearInterval(_packPollTimer); _packPollTimer = null;
+                    localStorage.removeItem('studysnap_pack_job');
+                    handlePackResult(job.data);
+                } else if (job.status === 'error' || job.status === 'not_found') {
+                    clearInterval(_packPollTimer); _packPollTimer = null;
+                    localStorage.removeItem('studysnap_pack_job');
+                    document.getElementById('error-message').textContent = job.error || 'Failed to generate study pack. Please try again.';
+                    showState(errorState);
+                }
+            } catch(e) { /* network hiccup – keep polling */ }
+        }, 2000);
+    }
+
+    async function generateStudyPack() {
+        showState(loadingState);
+        if (downloadBtn) downloadBtn.classList.add('hidden');
+        try {
+            const res = await fetch('/api/study-pack-generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            const data = await res.json();
+            if (data.job_id) {
+                localStorage.setItem('studysnap_pack_job', data.job_id);
+                pollPackJob(data.job_id);
+            } else {
+                document.getElementById('error-message').textContent = data.error || 'Failed to start generation. Please try again.';
+                showState(errorState);
+            }
+        } catch (err) {
+            document.getElementById('error-message').textContent = 'Network error. Please check your connection and try again.';
+            showState(errorState);
+        }
+    }
+
+    function renderPreview() {
+        const list = document.getElementById('contents-list');
+        if (!list || !packData) return;
+        let html = '';
+        const notesCount = (packData.detailed_notes || []).length;
+        const faqCount = (packData.faq_topics || []).length;
+        const papersCount = (packData.sample_papers || []).length;
+        const pointsCount = (packData.points_to_remember || []).length;
+
+        html += '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800">';
+        html += '<span class="material-symbols-outlined text-primary">menu_book</span>';
+        html += '<div><p class="font-semibold text-sm">Detailed Notes</p><p class="text-xs text-slate-500">' + notesCount + ' topic sections</p></div></div>';
+
+        html += '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800">';
+        html += '<span class="material-symbols-outlined text-primary">help</span>';
+        html += '<div><p class="font-semibold text-sm">Frequently Asked Topics</p><p class="text-xs text-slate-500">' + faqCount + ' topics with solutions &amp; examples</p></div></div>';
+
+        html += '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800">';
+        html += '<span class="material-symbols-outlined text-primary">description</span>';
+        html += '<div><p class="font-semibold text-sm">Sample Papers</p><p class="text-xs text-slate-500">' + papersCount + ' papers with 20 questions each</p></div></div>';
+
+        html += '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800">';
+        html += '<span class="material-symbols-outlined text-primary">lightbulb</span>';
+        html += '<div><p class="font-semibold text-sm">Points to Remember</p><p class="text-xs text-slate-500">' + pointsCount + ' key points &amp; formulas</p></div></div>';
+
+        list.innerHTML = html;
+    }
+
+    function buildPdfHTML() {
+        const d = packData;
+        const s = 'font-family:Inter,Arial,sans-serif;color:#000;line-height:1.7;';
+        let h = '<div style="' + s + '">';
+
+        // Cover / Title
+        h += '<div style="text-align:center;padding:60px 40px 40px;">';
+        h += '<h1 style="font-size:28px;margin:0 0 8px;">' + escapeHtml(d.title || 'Study Pack') + '</h1>';
+        h += '<p style="color:#555;font-size:14px;margin:0 0 6px;">Complete Study Pack</p>';
+        h += '<hr style="border:none;border-top:2px solid #488fe5;width:80px;margin:20px auto;">';
+        h += '<p style="color:#888;font-size:11px;">Contains: Detailed Notes &bull; FAQ Topics &bull; 5 Sample Papers &bull; Points to Remember</p>';
+        h += '</div>';
+
+        // ═══ SECTION 1: DETAILED NOTES ═══
+        h += '<div style="padding:30px 50px;">';
+        h += '<h2 style="font-size:22px;color:#488fe5;border-bottom:2px solid #488fe5;padding-bottom:8px;margin:0 0 20px;">Detailed Notes</h2>';
+        (d.detailed_notes || []).forEach((note, i) => {
+            h += '<h3 style="font-size:16px;margin:20px 0 8px;color:#333;">' + (i+1) + '. ' + escapeHtml(note.heading) + '</h3>';
+            h += '<p style="font-size:13px;color:#444;margin:0 0 12px;white-space:pre-wrap;">' + escapeHtml(note.content) + '</p>';
+        });
+        h += '</div>';
+
+        // ═══ SECTION 2: FAQ TOPICS ═══
+        h += '<div style="padding:30px 50px;">';
+        h += '<h2 style="font-size:22px;color:#488fe5;border-bottom:2px solid #488fe5;padding-bottom:8px;margin:0 0 20px;">Frequently Asked Topics</h2>';
+        (d.faq_topics || []).forEach((faq, i) => {
+            h += '<div style="margin:0 0 20px;padding:12px 16px;border:1px solid #e2e8f0;border-radius:8px;">';
+            h += '<p style="font-weight:700;font-size:14px;color:#333;margin:0 0 6px;">Q' + (i+1) + '. ' + escapeHtml(faq.question) + '</p>';
+            h += '<p style="font-size:13px;color:#444;margin:0 0 6px;white-space:pre-wrap;"><strong>Solution:</strong> ' + escapeHtml(faq.solution) + '</p>';
+            if (faq.exam_tip) {
+                h += '<p style="font-size:12px;color:#488fe5;margin:0;"><strong>Exam Tip:</strong> ' + escapeHtml(faq.exam_tip) + '</p>';
+            }
+            h += '</div>';
+        });
+        h += '</div>';
+
+        // ═══ SECTION 3: SAMPLE PAPERS ═══
+        (d.sample_papers || []).forEach(paper => {
+            h += '<div style="padding:30px 50px;page-break-before:always;">';
+            h += '<h2 style="font-size:20px;text-align:center;margin:0 0 4px;">Sample Paper ' + paper.paper_number + '</h2>';
+            h += '<p style="text-align:center;color:#666;font-size:12px;margin:0 0 4px;">Total Marks: 45 | Time: As needed</p>';
+            h += '<p style="text-align:center;color:#888;font-size:10px;margin:0 0 20px;">Section A &amp; B: 1 mark each | Section C: 3 marks each | Section D: 5 marks each</p>';
+            h += '<hr style="border:none;border-top:1px solid #ddd;margin:0 0 16px;">';
+
+            // MCQs
+            if (paper.mcq && paper.mcq.length) {
+                h += '<h3 style="font-size:15px;margin:16px 0 10px;border-bottom:1px solid #eee;padding-bottom:4px;">Section A: Multiple Choice Questions (5 x 1 = 5 Marks)</h3>';
+                paper.mcq.forEach(q => {
+                    h += '<p style="font-weight:600;margin:8px 0 3px;font-size:13px;">' + q.id + '. ' + escapeHtml(q.question) + '</p>';
+                    ['A','B','C','D'].forEach(k => {
+                        if (q.options && q.options[k]) {
+                            h += '<p style="margin:1px 0 1px 20px;font-size:12px;">(' + k + ') ' + escapeHtml(q.options[k]) + '</p>';
+                        }
+                    });
+                });
+            }
+
+            // Fill-ups
+            if (paper.fillups && paper.fillups.length) {
+                h += '<h3 style="font-size:15px;margin:20px 0 10px;border-bottom:1px solid #eee;padding-bottom:4px;">Section B: Fill in the Blanks (5 x 1 = 5 Marks)</h3>';
+                paper.fillups.forEach(q => {
+                    h += '<p style="margin:6px 0;font-size:13px;">' + q.id + '. ' + escapeHtml(q.question) + '</p>';
+                });
+            }
+
+            // Short
+            if (paper.short && paper.short.length) {
+                h += '<h3 style="font-size:15px;margin:20px 0 10px;border-bottom:1px solid #eee;padding-bottom:4px;">Section C: Short Answer Questions (5 x 3 = 15 Marks)</h3>';
+                paper.short.forEach(q => {
+                    h += '<p style="margin:6px 0;font-size:13px;">' + q.id + '. ' + escapeHtml(q.question) + ' <span style="color:#888;font-size:11px;">(3 marks)</span></p>';
+                });
+            }
+
+            // Long
+            if (paper.long && paper.long.length) {
+                h += '<h3 style="font-size:15px;margin:20px 0 10px;border-bottom:1px solid #eee;padding-bottom:4px;">Section D: Long Answer Questions (5 x 5 = 25 Marks)</h3>';
+                paper.long.forEach(q => {
+                    h += '<p style="margin:6px 0;font-size:13px;">' + q.id + '. ' + escapeHtml(q.question) + ' <span style="color:#888;font-size:11px;">(5 marks)</span></p>';
+                });
+            }
+
+            h += '</div>';
+        });
+
+        // ═══ SECTION 4: POINTS TO REMEMBER ═══
+        h += '<div style="padding:30px 50px;page-break-before:always;">';
+        h += '<h2 style="font-size:22px;color:#488fe5;border-bottom:2px solid #488fe5;padding-bottom:8px;margin:0 0 20px;">Points to Remember</h2>';
+        (d.points_to_remember || []).forEach((point, i) => {
+            h += '<p style="margin:6px 0;font-size:13px;padding:6px 10px;background:' + (i%2===0?'#f8fafc':'#fff') + ';border-left:3px solid #488fe5;border-radius:4px;">' + (i+1) + '. ' + escapeHtml(point) + '</p>';
+        });
+        h += '</div>';
+
+        // Footer
+        h += '<div style="text-align:center;padding:20px 50px;border-top:1px solid #eee;margin-top:20px;">';
+        h += '<p style="color:#aaa;font-size:10px;">Generated by StudySnap AI</p>';
+        h += '</div>';
+
+        h += '</div>';
+        return h;
+    }
+
+    function downloadPdf() {
+        if (!packData) return;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const PW = 210, PH = 297, M = 15;
+        const IW = PW - M * 2;
+        let y = M;
+
+        function chk(need) { if (y + need > PH - M) { doc.addPage(); y = M; } }
+        function txt(text, size, style, colorHex, indent) {
+            doc.setFontSize(size);
+            doc.setFont('helvetica', style || 'normal');
+            if (colorHex) { const b = parseInt(colorHex.slice(1), 16); doc.setTextColor((b>>16)&255,(b>>8)&255,b&255); }
+            else doc.setTextColor(0);
+            const lh = size * 0.42;
+            const lines = doc.splitTextToSize(String(text || ''), IW - (indent || 0));
+            chk(lines.length * lh + 2);
+            doc.text(lines, M + (indent || 0), y); y += lines.length * lh + 2;
+        }
+        function rule() { chk(4); doc.setDrawColor(200); doc.line(M, y, PW - M, y); y += 4; }
+        function sectionHead(t) { y += 3; txt(t, 14, 'bold', '#488fe5'); rule(); }
+        function newPage() { doc.addPage(); y = M; }
+
+        // ── Cover
+        txt(packData.title || 'Study Pack', 20, 'bold', '#000000');
+        y += 1;
+        txt('Complete Study Pack  •  Generated by StudySnap AI', 9, 'normal', '#888888');
+        txt('Contains: Detailed Notes • FAQ Topics • Sample Papers • Points to Remember', 9, 'italic', '#aaaaaa');
+        rule();
+
+        // ── Section 1: Detailed Notes
+        sectionHead('Detailed Notes');
+        (packData.detailed_notes || []).forEach((note, i) => {
+            y += 2; chk(8);
+            txt((i + 1) + '. ' + note.heading, 11, 'bold', '#333333');
+            txt(note.content || '', 9, 'normal', '#444444', 4);
+            y += 2;
+        });
+
+        // ── Section 2: FAQ Topics
+        newPage(); sectionHead('Frequently Asked Topics');
+        (packData.faq_topics || []).forEach((faq, i) => {
+            y += 3; chk(12);
+            txt('Q' + (i + 1) + '. ' + faq.question, 11, 'bold', '#333333');
+            txt('Answer: ' + (faq.solution || ''), 9, 'normal', '#444444', 4);
+            if (faq.exam_tip) txt('Exam Tip: ' + faq.exam_tip, 9, 'italic', '#488fe5', 4);
+        });
+
+        // ── Section 3: Sample Papers
+        (packData.sample_papers || []).forEach(paper => {
+            newPage();
+            txt('Sample Paper ' + paper.paper_number, 16, 'bold', '#000000');
+            txt('Total Marks: 45  |  Instructions: Answer all questions.', 9, 'normal', '#666666');
+            rule();
+            function paperSection(qs, heading) {
+                if (!qs || !qs.length) return;
+                y += 4; chk(8);
+                txt(heading, 11, 'bold', '#488fe5');
+                qs.forEach(q => {
+                    y += 2; chk(8);
+                    txt(q.id + '. ' + q.question, 10, 'bold', '#000000');
+                    if (q.options) ['A','B','C','D'].forEach(k => {
+                        if (q.options[k]) txt('(' + k + ') ' + q.options[k], 9, 'normal', '#333333', 8);
+                    });
+                });
+            }
+            paperSection(paper.mcq,     'Section A: Multiple Choice Questions (5 × 1 = 5 Marks)');
+            paperSection(paper.fillups, 'Section B: Fill in the Blanks (5 × 1 = 5 Marks)');
+            paperSection(paper.short,   'Section C: Short Answer Questions (5 × 3 = 15 Marks)');
+            paperSection(paper.long,    'Section D: Long Answer Questions (5 × 5 = 25 Marks)');
+        });
+
+        // ── Section 4: Points to Remember
+        newPage(); sectionHead('Points to Remember');
+        (packData.points_to_remember || []).forEach((point, i) => {
+            y += 1; chk(7);
+            txt((i + 1) + '. ' + point, 10, 'normal', '#222222');
+        });
+
+        const filename = (packData.title || 'study-pack').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_study_pack.pdf';
+        doc.save(filename);
+    }
+
+    // Event listeners
+    if (generateBtn) generateBtn.addEventListener('click', generateStudyPack);
+    if (retryBtn) retryBtn.addEventListener('click', generateStudyPack);
+    if (regenerateBtn) regenerateBtn.addEventListener('click', () => {
+        packData = null;
+        if (downloadBtn) downloadBtn.classList.add('hidden');
+        if (_packPollTimer) { clearInterval(_packPollTimer); _packPollTimer = null; }
+        localStorage.removeItem('studysnap_pack_job');
+        generateStudyPack();
+    });
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadPdf);
+
+    // Check for active generation job (survives tab switches)
+    const activePackJob = localStorage.getItem('studysnap_pack_job');
+    if (activePackJob) {
+        showState(loadingState);
+        if (downloadBtn) downloadBtn.classList.add('hidden');
+        pollPackJob(activePackJob);
+    }
+});
+</script>
+</body></html>
