@@ -3,6 +3,7 @@
 from google import genai
 from google.genai import types
 import json, re, os, time
+from html import escape
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 if not GEMINI_API_KEY:
@@ -81,12 +82,27 @@ def _translate_to_english(html_text):
 
 def _parse_json_text(text):
     """Parse JSON from text, handling markdown fences, control chars and truncation."""
+    if text is None:
+        raise json.JSONDecodeError('Empty response', '', 0)
+
     text = re.sub(r'^```(?:json)?\s*\n?', '', text)
     text = re.sub(r'\n?\s*```$', '', text.strip()).strip()
+    if not text:
+        raise json.JSONDecodeError('Empty response', '', 0)
+
     if not text.startswith(('{', '[')):
         m = re.search(r'([\{\[][\s\S]*[\}\]])', text)
         if m:
             text = m.group(1)
+        else:
+            first_obj = text.find('{')
+            last_obj = text.rfind('}')
+            first_arr = text.find('[')
+            last_arr = text.rfind(']')
+            if first_obj != -1 and last_obj > first_obj:
+                text = text[first_obj:last_obj + 1]
+            elif first_arr != -1 and last_arr > first_arr:
+                text = text[first_arr:last_arr + 1]
 
     # Attempt 1: parse as-is
     try:
@@ -166,6 +182,109 @@ def _call_gemini(prompt):
     raise last_err or RuntimeError('All Gemini models exhausted. Please try again later.')
 
 
+def _extract_sentences(transcript, max_items=8):
+    """Pick concise, non-trivial sentences from transcript for fallback notes."""
+    chunks = re.split(r'(?<=[.!?])\s+|\n+', transcript or '')
+    cleaned = []
+    seen = set()
+    for raw in chunks:
+        s = re.sub(r'\s+', ' ', raw).strip()
+        if len(s) < 35:
+            continue
+        key = s.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(s)
+        if len(cleaned) >= max_items:
+            break
+    return cleaned
+
+
+def _fallback_html_list(items):
+    if not items:
+        return '<ul><li>No key points could be extracted automatically.</li></ul>'
+    return '<ul>' + ''.join(f'<li>{escape(item)}</li>' for item in items) + '</ul>'
+
+
+def _build_fallback_study_material(transcript, exam_mode, language):
+    """Return a safe, template-compatible summary payload when AI JSON fails."""
+    points = _extract_sentences(transcript, max_items=10)
+    short_points = points[:4]
+    medium_points = points[:7]
+    detailed_points = points[:10]
+    short_summary = ' '.join(short_points[:2]) if short_points else 'Auto summary could not be generated from this transcript.'
+    medium_summary = ' '.join(medium_points[:4]) if medium_points else short_summary
+    detailed_summary = ' '.join(detailed_points) if detailed_points else medium_summary
+
+    terms = []
+    for sentence in points:
+        for token in re.findall(r"[A-Za-z][A-Za-z0-9\-/+]{3,}", sentence):
+            token_l = token.lower()
+            if token_l not in terms:
+                terms.append(token_l)
+            if len(terms) >= 10:
+                break
+        if len(terms) >= 10:
+            break
+
+    summary_html_short = f'<p>{escape(short_summary)}</p>'
+    summary_html_medium = f'<p>{escape(medium_summary)}</p>'
+    summary_html_detailed = f'<p>{escape(detailed_summary)}</p>'
+
+    important_short = "<h5>Key Concepts</h5>" + _fallback_html_list(short_points)
+    important_medium = "<h5>Topic Overview</h5>" + _fallback_html_list(medium_points)
+    important_detailed = "<h5>Detailed Notes</h5>" + _fallback_html_list(detailed_points)
+
+    priority_sections = []
+    for idx, point in enumerate(short_points or ['Review the source transcript to extract exam questions.'], start=1):
+        priority_sections.append(
+            "<div class='concept-card'>"
+            f"<h5>Topic {idx}</h5>"
+            f"<p><strong>Definition:</strong> {escape(point)}</p>"
+            f"<p><strong>Why Important for {escape(exam_mode)}:</strong> Revise this concept for direct and short-answer questions.</p>"
+            "<ul>"
+            "<li><strong>Q:</strong> What is the main idea? <strong>A:</strong> Refer to this topic statement.</li>"
+            "<li><strong>Q:</strong> Why is it tested? <strong>A:</strong> It captures a core concept from the source.</li>"
+            "</ul>"
+            "</div>"
+        )
+
+    return {
+        'video_title': 'Auto-generated notes (fallback)',
+        'chapter_title': 'Transcript Analysis',
+        'main_summary': {
+            'short': summary_html_short,
+            'medium': summary_html_medium,
+            'detailed': summary_html_detailed,
+        },
+        'important_points': {
+            'short': important_short,
+            'medium': important_medium,
+            'detailed': important_detailed,
+        },
+        'priority_topics': {
+            'short': ''.join(priority_sections[:2]),
+            'medium': ''.join(priority_sections[:3]),
+            'detailed': ''.join(priority_sections),
+        },
+        'hindi_notes': {
+            'short': '<h5>मुख्य बिंदु</h5><ul><li>ऑटो-जनरेट नोट्स उपलब्ध नहीं हो सके।</li></ul>',
+            'medium': '<h5>संक्षिप्त नोट्स</h5><ul><li>कृपया थोड़ी देर बाद पुनः प्रयास करें।</li></ul>',
+            'detailed': '<h5>विस्तृत नोट्स</h5><ul><li>सिस्टम ने ट्रांसक्रिप्ट सेव कर लिया है, आप पुनः जनरेट कर सकते हैं।</li></ul>',
+        },
+        'core_observations': [
+            {'title': 'Fallback Mode', 'description': 'The AI returned invalid JSON, so a safe summary was generated from transcript text.'}
+        ],
+        'highlights': [
+            {'type': 'insight', 'title': 'Recovery Applied', 'description': 'StudySnap generated a reliable fallback to keep the summary page available.'},
+            {'type': 'exam', 'title': 'Exam Relevance', 'description': f'Use the important points to prepare for {exam_mode} questions.'}
+        ],
+        'key_terms': terms,
+        'conclusion': f'<p>Fallback summary generated in {escape(language)}. Regenerate later for richer AI output.</p>',
+    }
+
+
 def generate_study_material(transcript, exam_mode, language, difficulty, study_depth):
     """Generate comprehensive study material from a transcript using Gemini."""
 
@@ -236,7 +355,11 @@ CRITICAL RULES:
 8. IMPORTANT_POINTS LANGUAGE RULE (HIGHEST PRIORITY): The important_points.short, important_points.medium, and important_points.detailed fields MUST ALL be written 100% in {language}. Do NOT write any Devanagari (Hindi) characters in important_points under any circumstances. important_points is NOT hindi_notes — keep them completely separate.
 """
 
-    result = _call_gemini(prompt)
+    try:
+        result = _call_gemini(prompt)
+    except Exception as e:
+        print(f'[summary] Falling back to transcript-based summary due to AI error: {type(e).__name__}: {e}')
+        result = _build_fallback_study_material(transcript_text, exam_mode, language)
 
     # Ensure result is a dict
     if not isinstance(result, dict):

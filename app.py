@@ -127,6 +127,41 @@ def extract_video_id(url):
     return None
 
 
+def _extract_text_from_transcript_entries(entries):
+    """Normalize transcript entries (dict/object/string) into plain text."""
+    if not entries:
+        return ''
+    parts = []
+    for entry in entries:
+        if isinstance(entry, dict):
+            text = entry.get('text', '')
+        elif hasattr(entry, 'text'):
+            text = getattr(entry, 'text', '')
+        else:
+            text = str(entry)
+        text = (text or '').strip()
+        if text:
+            parts.append(text)
+    return ' '.join(parts).strip()
+
+
+def _extract_text_from_transcript_object(transcript_obj):
+    """Normalize transcript object/list into plain text."""
+    if transcript_obj is None:
+        return ''
+    if isinstance(transcript_obj, str):
+        return transcript_obj.strip()
+    if isinstance(transcript_obj, list):
+        return _extract_text_from_transcript_entries(transcript_obj)
+    if hasattr(transcript_obj, 'fetch'):
+        try:
+            fetched = transcript_obj.fetch()
+            return _extract_text_from_transcript_entries(fetched)
+        except Exception:
+            return ''
+    return ''
+
+
 def get_transcript(video_id):
     """Get transcript text from a YouTube video. Supports multiple API versions."""
     languages = ['en', 'hi', 'en-US', 'en-GB', 'en-IN']
@@ -134,34 +169,67 @@ def get_transcript(video_id):
     # Try the static method approach (version 0.6.x and 1.x)
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        if isinstance(transcript, list) and len(transcript) > 0:
-            # Version 0.6.x returns list of dicts
-            if isinstance(transcript[0], dict):
-                return ' '.join([entry.get('text', '') for entry in transcript])
-            # Fallback for object-based entries
-            return ' '.join([str(entry) for entry in transcript])
+        text = _extract_text_from_transcript_object(transcript)
+        if text:
+            return text
     except Exception as e:
         print(f'[transcript] Primary method failed: {e}')
 
     # Try with language fallback
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=languages)
-        if isinstance(transcript, list) and len(transcript) > 0:
-            if isinstance(transcript[0], dict):
-                return ' '.join([entry.get('text', '') for entry in transcript])
-            return ' '.join([str(entry) for entry in transcript])
+        text = _extract_text_from_transcript_object(transcript)
+        if text:
+            return text
     except Exception as e:
         print(f'[transcript] Language fallback failed: {e}')
+
+    # Try transcript listing APIs (covers more video/language cases)
+    try:
+        ytt = YouTubeTranscriptApi()
+        list_fn = None
+        if hasattr(ytt, 'list'):
+            list_fn = ytt.list
+        elif hasattr(YouTubeTranscriptApi, 'list_transcripts'):
+            list_fn = YouTubeTranscriptApi.list_transcripts
+        if list_fn:
+            transcript_list = list_fn(video_id)
+            for lang in languages:
+                try:
+                    if hasattr(transcript_list, 'find_transcript'):
+                        chosen = transcript_list.find_transcript([lang])
+                        text = _extract_text_from_transcript_object(chosen)
+                        if text:
+                            return text
+                except Exception:
+                    continue
+            for finder in ('find_manually_created_transcript', 'find_generated_transcript'):
+                fn = getattr(transcript_list, finder, None)
+                if not fn:
+                    continue
+                try:
+                    chosen = fn(languages)
+                    text = _extract_text_from_transcript_object(chosen)
+                    if text:
+                        return text
+                except Exception:
+                    continue
+    except Exception as e:
+        print(f'[transcript] Transcript-list fallback failed: {e}')
 
     # Try instance-based approach (newer versions)
     try:
         ytt = YouTubeTranscriptApi()
         if hasattr(ytt, 'fetch'):
             transcript = ytt.fetch(video_id)
-            return ' '.join([entry.text for entry in transcript])
+            text = _extract_text_from_transcript_object(transcript)
+            if text:
+                return text
         elif hasattr(ytt, 'get_transcript'):
             transcript = ytt.get_transcript(video_id)
-            return ' '.join([entry.get('text', '') for entry in transcript])
+            text = _extract_text_from_transcript_object(transcript)
+            if text:
+                return text
     except Exception as e:
         print(f'[transcript] Instance method failed: {e}')
 
@@ -408,10 +476,7 @@ _uploaded_texts_lock = threading.Lock()
 
 def _extract_pdf_text(filepath):
     """Extract text from a PDF file."""
-    try:
-        from pypdf import PdfReader
-    except ImportError:
-        from PyPDF2 import PdfReader
+    from pypdf import PdfReader
     reader = PdfReader(filepath)
     parts = []
     for page in reader.pages:
