@@ -65,6 +65,17 @@ if(s==="dark"||(!s&&d))document.documentElement.classList.add("dark");else docum
 </div>
 </div>
 </div>
+<!-- Error Container -->
+<div id="error-container" style="display:none" class="w-full rounded-xl p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 mb-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-red-500 text-xl mt-0.5">error</span>
+<div class="flex flex-col gap-1">
+<p id="error-message" class="font-semibold text-sm"></p>
+<p class="text-xs text-red-600 dark:text-red-400">Redirecting to home page in <span id="redirect-countdown">5</span> seconds...</p>
+<p class="text-xs mt-1 text-red-600 dark:text-red-400">💡 <strong>Tips:</strong> Try a video with captions enabled, or upload a PDF/PPTX file instead.</p>
+</div>
+</div>
+</div>
 <!-- Progress Container -->
 <div class="w-full glass-panel rounded-2xl p-6 md:p-8 space-y-6 glow-effect">
 <div class="flex flex-col gap-4">
@@ -153,6 +164,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const stepBars = document.querySelectorAll('.step-bar');
     const stepLabels = document.querySelectorAll('.step-label');
 
+    // Show error message in the error container with countdown redirect
+    function showError(message) {
+        const errorContainer = document.getElementById('error-container');
+        const errorMsg = document.getElementById('error-message');
+        const countdownEl = document.getElementById('redirect-countdown');
+        if (errorContainer && errorMsg) {
+            errorMsg.textContent = message;
+            errorContainer.style.display = 'block';
+        }
+        let countdown = 5;
+        const timer = setInterval(() => {
+            countdown--;
+            if (countdownEl) countdownEl.textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(timer);
+                window.location.href = '/';
+            }
+        }, 1000);
+    }
+
     // Read stored form data
     const url = localStorage.getItem('studysnap_url') || '';
     const uploadMode = localStorage.getItem('studysnap_upload_mode') || '';
@@ -233,17 +264,16 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('studysnap_file_key');
             setTimeout(() => { window.location.href = '/summary'; }, 800);
         } else {
-            alert('Error: ' + (data.error || 'Something went wrong. Please try again.'));
-            window.location.href = '/';
+            clearInterval(stageInterval);
+            showError(data.error || 'Something went wrong. Please try again.');
         }
     })
     .catch(err => {
         clearInterval(stageInterval);
-        const msg = err.name === 'TimeoutError' || err.message.includes('timed out')
+        const msg = err.name === 'TimeoutError' || (err.message && err.message.includes('timed out'))
             ? 'Generation is taking too long. The AI may be busy — please wait a moment and try again.'
-            : 'Failed to generate study pack. Please check your connection and try again.\n\n' + err.message;
-        alert(msg);
-        window.location.href = '/';
+            : 'Failed to generate study pack. Please check your connection and try again.';
+        showError(msg);
     });
 });
 </script>
