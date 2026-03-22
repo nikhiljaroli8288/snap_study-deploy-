@@ -580,11 +580,11 @@ def api_generate():
     # Extract video ID
     video_id = extract_video_id(url)
     if not video_id:
-        return jsonify({'error': 'Invalid YouTube URL. Please paste a valid YouTube video link.'}), 400
+        return jsonify({'success': False, 'error': 'Invalid YouTube URL. Please paste a valid YouTube video link.'}), 400
 
     # Get transcript (auto-extract only)
     transcript = get_transcript(video_id) if video_id else None
-    if not transcript:
+    if not transcript or len(transcript.strip()) < 50:
         # Provide detailed error with helpful info
         error_msg = (
             'Could not extract transcript from this video. '
@@ -593,10 +593,7 @@ def api_generate():
             'or (3) Check if the video is publicly accessible.'
         )
         print(f'[transcript] Failed for video_id: {video_id}, URL: {url}')
-        return jsonify({'error': error_msg, 'video_id': video_id}), 400
-
-    if not transcript or len(transcript.strip()) < 50:
-        return jsonify({'error': 'Transcript is too short or empty. Please try a different video or upload a document.'}), 400
+        return jsonify({'success': False, 'error': error_msg, 'video_id': video_id}), 400
 
     # Check cache — if we already generated notes for this URL, reuse them
     try:
@@ -626,7 +623,7 @@ def api_generate():
         return jsonify({'success': True})
     except Exception as e:
         print(f'[summary] Exception ({type(e).__name__}): {e}')
-        return jsonify({'error': f'AI generation failed: {str(e)}. Please try again.'}), 500
+        return jsonify({'success': False, 'error': f'AI generation failed: {str(e)}. Please try again.'}), 500
 
 
 @app.route("/api/chat", methods=["POST"])
